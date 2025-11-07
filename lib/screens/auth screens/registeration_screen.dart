@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'login_screen.dart'; // import login screen
 
-class ForgotPasswordScreen extends StatelessWidget {
+class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.deepPurple,
-        title: const Text('Forgot Password'),
+        title: const Text('Create Account'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -15,48 +16,59 @@ class ForgotPasswordScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 30),
+            // Logo
+            Image.asset('assets/logo.png', height: 90),
 
-            //  Illustration image (put it in images folder)
-            Image.asset(
-              'assets/forgot_password.png',
-              height: 250,
-            ),
+            const SizedBox(height: 20),
 
-            const SizedBox(height: 30),
-
-            // Title
+            // Heading
             const Text(
-              'Forgot your password?',
-              textAlign: TextAlign.center,
+              "Join Crispac Logistics",
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.deepPurple,
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 30),
 
-            //  Subtitle
-            const Text(
-              'No worries! Enter your phone number and we’ll send you an SMS with a reset code.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
+            // Full Name
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Full Name',
+                prefixIcon: Icon(Icons.person_outline),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
 
-            //  Phone Number Field
+            
+           // Phone Number
+             TextField(
+               keyboardType: TextInputType.phone,
+               decoration: InputDecoration(
+               labelText: 'Phone Number',
+               prefixIcon: Icon(Icons.phone_android),
+               hintText: '+256 76230684', // optional placeholder
+               border: OutlineInputBorder(
+                 borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+
+            const SizedBox(height: 20),
+
+
+            // Password
             TextField(
-              keyboardType: TextInputType.phone,
+              obscureText: true,
               decoration: InputDecoration(
-                labelText: 'Phone Number',
-                prefixIcon: const Icon(Icons.phone_android),
-                hintText: '+256 700 123456',
+                labelText: 'Password',
+                prefixIcon: Icon(Icons.lock_outline),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -65,14 +77,12 @@ class ForgotPasswordScreen extends StatelessWidget {
 
             const SizedBox(height: 30),
 
-            //  Send Code Button
+            // Register Button
             ElevatedButton(
               onPressed: () {
+                // You can later add backend logic here for registration
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Verification code sent to your phone number!'),
-                  ),
+                  SnackBar(content: Text('Registered Successfully!')),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -83,21 +93,24 @@ class ForgotPasswordScreen extends StatelessWidget {
                 ),
               ),
               child: const Text(
-                'Send Code',
+                'Register',
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
 
             const SizedBox(height: 25),
 
-            //Back to Login
+            // Already have an account? Login
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("Remembered your password? "),
+                const Text("Already have an account? "),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                    );
                   },
                   child: const Text(
                     'Login',
