@@ -20,11 +20,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           controller: _controller,
           onPageChanged: (index) => setState(() => isLastPage = index == 3),
           children: [
-            buildPage(
-              image: '',
-              title: 'Uniforms for Schools',
-              description: 'Professional and comfortable uniforms for students and teachers.',
-            ),
+            // buildPage(
+            //   image: 'assets/school.png',
+            //   title: 'Uniforms for Schools',
+            //   description: 'Professional and comfortable uniforms for students and teachers.',
+            // ),
             buildPage(
               image: 'assets/hotel.jpg',
               title: 'Hotel & Restaurant Staff',
