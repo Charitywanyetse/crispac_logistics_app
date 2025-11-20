@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+
 import 'auth screens/login_screen.dart';
+
+
 
 class OnboardingScreen extends StatefulWidget {
   @override
@@ -14,41 +16,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        padding: EdgeInsets.all(20),
-        child: PageView(
-          controller: _controller,
-          onPageChanged: (index) => setState(() => isLastPage = index == 3),
-          children: [
-            // buildPage(
-            //   image: 'assets/school.png',
-            //   title: 'Uniforms for Schools',
-            //   description: 'Professional and comfortable uniforms for students and teachers.',
-            // ),
-            buildPage(
-              image: 'assets/hotel.jpg',
-              title: 'Hotel & Restaurant Staff',
-              description: 'Smart and stylish uniforms for chefs, waiters, and receptionists.',
-            ),
-            buildPage(
-              image: 'assets/industrial.jpg',
-              title: 'Industrial & Construction',
-              description: 'Safe and durable work uniforms for construction and industrial teams.',
-            ),
-            buildPage(
-              image: 'assets/med.png',
-              title: 'Medical Professionals',
-              description: 'Clean and professional scrubs and lab coats for hospitals and clinics.',
-            ),
-          ],
-        ),
+      body: PageView(
+        controller: _controller,
+        onPageChanged: (index) => setState(() => isLastPage = index == 3),
+        children: [
+          buildPage('assets/school.png', 'School Uniforms',
+              'Neat and smart uniforms for students and teachers.'),
+          buildPage('assets/hotel.jpg', 'Hotel & Restaurant',
+              'Professional uniforms for chefs and service staff.'),
+          buildPage('assets/industrial.jpg', 'Construction & Industry',
+              'Durable uniforms for industrial and field workers.'),
+          buildPage('assets/med.png', 'Medical Professionals',
+              'Clean and professional uniforms for hospitals.'),
+        ],
       ),
       bottomSheet: isLastPage
           ? TextButton(
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (_) => LoginScreen()), // goes to Auth first
+                  MaterialPageRoute(builder: (_) => LoginScreen()),
                 );
               },
               child: Container(
@@ -64,7 +51,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             )
           : Container(
               height: 60,
-              padding: EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -72,16 +58,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: const Text('Skip'),
                     onPressed: () => _controller.jumpToPage(3),
                   ),
-                  Row(
-                    children: [
-                      TextButton(
-                        child: const Text('Next'),
-                        onPressed: () => _controller.nextPage(
-                          duration: const Duration(milliseconds: 500),
-                          curve: Curves.easeInOut,
-                        ),
-                      ),
-                    ],
+                  TextButton(
+                    child: const Text('Next'),
+                    onPressed: () => _controller.nextPage(
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                    ),
                   ),
                 ],
               ),
@@ -89,34 +71,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget buildPage({
-    required String image,
-    required String title,
-    required String description,
-  }) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Image.asset(image, height: 300), // Illustration
-        const SizedBox(height: 30),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: Colors.deepPurple,
+  Widget buildPage(String image, String title, String description) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(image, height: 280),
+          const SizedBox(height: 30),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple,
+            ),
           ),
-        ),
-        const SizedBox(height: 15),
-        Text(
-          description,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 18,
-            color: Colors.black54,
+          const SizedBox(height: 15),
+          Text(
+            description,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16, color: Colors.black54),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -1,53 +1,44 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'onboarding_screen.dart';
+import 'onboarding_screen.dart'; // if in same folder
+
 
 class SplashScreen extends StatefulWidget {
-@override
-_SplashScreenState createState() => _SplashScreenState();
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
 }
-
 class _SplashScreenState extends State<SplashScreen> {
-@override
-void initState() {
-super.initState();
+  @override
+  void initState() {
+    super.initState();
+    Timer(Duration(seconds: 3), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => OnboardingScreen()),
+      );
+    });
+  }
 
-// Move to Onboarding after 3 seconds
-Timer(Duration(seconds: 3), () {
-Navigator.pushReplacement(
-context,
-MaterialPageRoute(builder: (context) => OnboardingScreen()),
-);
-});
-
-}
-
-
-
-@override
-Widget build(BuildContext context) {
-return Scaffold(
-backgroundColor: Colors.deepPurple,
-body: Center(
-child: Column(
-mainAxisAlignment: MainAxisAlignment.center,
-children: [
-// App logo or icon
-Image.asset('assets/logo.png', height: 200),
-SizedBox(height: 25),
-Text(
-"welcome to Crispac logistics App",
-style: TextStyle(
-color: const Color.fromARGB(255, 233, 230, 235),
-fontSize: 24,
-fontWeight: FontWeight.bold,
-),
-),
-SizedBox(height: 40),
-CircularProgressIndicator(color: const Color.fromARGB(255, 14, 13, 13)),
-],
-),
-),
-);
-}
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 124, 103, 160),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/logo.png', height: 200),
+            SizedBox(height: 30),
+            Text(
+              'crispac logistic  App',
+              style: TextStyle(
+                  color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 40),
+            CircularProgressIndicator(color: Colors.white),
+          ],
+        ),
+      ),
+    );
+  }
 }

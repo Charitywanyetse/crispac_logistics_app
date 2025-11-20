@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'registeration_screen.dart';
-import 'forgot_password_screen.dart';
-import '../home_screen.dart';
+import 'registeration_screen.dart'; // Make sure this file exists in the same folder
+import '../home_screen.dart';   // Home screen after login
+import 'forgot_password_screen.dart'; // Forgot password screen
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -22,15 +22,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _login() {
     if (_formKey.currentState!.validate()) {
-      // Only navigate if all fields are valid
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => HomeScreen()),
-      );
-    } else {
-      // Optionally show a message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     }
   }
@@ -49,7 +43,6 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 // Logo
                 Image.asset('assets/logo.png', height: 100),
-
                 const SizedBox(height: 20),
 
                 // App name
@@ -61,44 +54,30 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 const SizedBox(height: 40),
 
-                // Login title
-                const Text(
-                  'Welcome Back!',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Phone Number Field
+                // Phone Number
                 TextFormField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     labelText: 'Phone Number',
                     prefixIcon: const Icon(Icons.phone_android),
-                    hintText: '+256 700 123456',
+                    hintText: '+256 76230684',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Phone number is required';
+                      return 'Please enter your phone number';
                     }
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 20),
 
-                // Password Field
+                // Password
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
@@ -111,15 +90,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Password is required';
+                      return 'Please enter your password';
                     }
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 10),
 
-                // Forgot Password
+                // Forgot password
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -127,22 +105,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => ForgotPasswordScreen()),
+                            builder: (context) => ForgotPasswordScreen()),
                       );
                     },
                     child: const Text(
                       'Forgot Password?',
-                      style: TextStyle(
-                        color: Colors.deepPurple,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(color: Colors.deepPurple),
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
 
-                // Login Button
+                // Login button
                 ElevatedButton(
                   onPressed: _login,
                   style: ElevatedButton.styleFrom(
@@ -157,10 +131,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                 ),
-
                 const SizedBox(height: 30),
 
-                // Register link
+                // Signup text
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -170,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => RegisterScreen()),
+                              builder: (context) => RegisterScreen()),
                         );
                       },
                       child: const Text(
