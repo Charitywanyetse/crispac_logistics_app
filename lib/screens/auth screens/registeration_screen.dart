@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import 'transitions.dart'; // import the file with SlidePageRoute
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -8,33 +9,31 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   void _register() {
     if (_formKey.currentState!.validate()) {
-      // All fields valid
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registered Successfully!')),
       );
-      // Optionally navigate to Login screen
+
+      // Navigate to login using an animated slide route (to right -> left)
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => LoginScreen()),
-      );
-    } else {
-      // Validation failed
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        SlidePageRoute(page: LoginScreen(), direction: AxisDirection.left),
       );
     }
   }
@@ -42,141 +41,166 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
-        title: const Text('Create Account'),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Logo
-              Image.asset('assets/logo.png', height: 90),
-
-              const SizedBox(height: 20),
-
-              // Heading
-              const Text(
-                "Join Crispac Logistics",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple,
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Full Name
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Full Name',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Full name is required';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              // Phone Number
-              TextFormField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  labelText: 'Phone Number',
-                  prefixIcon: const Icon(Icons.phone_android),
-                  hintText: '+256 76230684',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Phone number is required';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              // Password
-              TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Password is required';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 30),
-
-              // Register Button
-              ElevatedButton(
-                onPressed: _register,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Register',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
-              ),
-
-              const SizedBox(height: 25),
-
-              // Already have an account? Login
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      backgroundColor: Colors.grey.shade100,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
                 children: [
-                  const Text("Already have an account? "),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => LoginScreen()),
-                      );
+                  // HERO LOGO (match tag on LoginScreen)
+                  // Hero(
+                  //   tag: 'app-logo-hero',
+                  //   child: Image.asset(
+                  //     'assets/logo.png',
+                  //     height: 110,
+                  //     fit: BoxFit.contain,
+                  //   ),
+                  // ),
+                                  //  Illustration image (put it in images folder)
+            Image.asset(
+              'assets/regi.png',
+              height: 150,
+            ),
+
+                  const SizedBox(height: 18),
+
+                  Text(
+                    "Create Your Account",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple.shade700,
+                    ),
+                  ),
+
+                  const SizedBox(height: 26),
+
+                  _buildTextField(
+                    controller: _nameController,
+                    label: "Full Name",
+                    icon: Icons.person_outline,
+                    validator: (value) =>
+                        value!.isEmpty ? "Full name is required" : null,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  _buildTextField(
+                    controller: _phoneController,
+                    label: "Phone Number",
+                    icon: Icons.phone_android,
+                    keyboardType: TextInputType.phone,
+                    validator: (value) =>
+                        value!.isEmpty ? "Phone number is required" : null,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  _buildTextField(
+                    controller: _passwordController,
+                    label: "Password",
+                    icon: Icons.lock_outline,
+                    obscure: true,
+                    validator: (value) =>
+                        value!.isEmpty ? "Password is required" : null,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  _buildTextField(
+                    controller: _confirmPasswordController,
+                    label: "Confirm Password",
+                    icon: Icons.lock_reset,
+                    obscure: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return "Confirm your password";
+                      if (value != _passwordController.text) return "Passwords do not match";
+                      return null;
                     },
-                    child: const Text(
-                      'Login',
-                      style: TextStyle(
-                        color: Colors.deepPurple,
-                        fontWeight: FontWeight.bold,
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ElevatedButton(
+                      onPressed: _register,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        "Register",
+                        style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ),
+
+                  const SizedBox(height: 18),
+      
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Already have an account? "),
+                      GestureDetector(
+                        onTap: () {
+                          // Push to login with a right-to-left slide
+                          Navigator.push(
+                            context,
+                            SlidePageRoute(page: LoginScreen(), direction: AxisDirection.left),
+                          );
+                        },
+                        child: const Text(
+                          "Login",
+                          style: TextStyle(
+                            color: Colors.deepPurple,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-            ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscure = false,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscure,
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        filled: true,
+        fillColor: Colors.white,
+        labelStyle: const TextStyle(fontSize: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
         ),
       ),
     );

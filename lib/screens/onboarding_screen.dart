@@ -22,9 +22,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           buildPage('assets/school.png', 'School Uniforms',
               'Neat and smart uniforms for students and teachers.'),
-          buildPage('assets/hotel.jpg', 'Hotel & Restaurant',
+          buildPage('assets/hotel.png', 'Hotel & Restaurant',
               'Professional uniforms for chefs and service staff.'),
-          buildPage('assets/industrial.jpg', 'Construction & Industry',
+          buildPage('assets/Constraction Wear.png', 'Construction & Industry',
               'Durable uniforms for industrial and field workers.'),
           buildPage('assets/med.png', 'Medical Professionals',
               'Clean and professional uniforms for hospitals.'),
@@ -40,8 +40,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               },
               child: Container(
                 width: double.infinity,
-                height: 60,
-                color: Colors.deepPurple,
+                height: 50,
+                color: const Color.fromARGB(255, 173, 139, 233),
                 alignment: Alignment.center,
                 child: const Text(
                   'Get Started',
@@ -77,8 +77,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(image, height: 280),
-          const SizedBox(height: 30),
+          Image.asset(image, height: 180),
+          const SizedBox(height: 25),
           Text(
             title,
             style: const TextStyle(

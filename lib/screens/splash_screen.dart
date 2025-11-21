@@ -22,19 +22,20 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 124, 103, 160),
+      // backgroundColor: const Color.fromARGB(255, 173, 139, 233),
+      
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/logo.png', height: 200),
-            SizedBox(height: 30),
+            Image.asset('assets/logo.png', height: 100),
+            SizedBox(height: 20),
             Text(
-              'crispac logistic  App',
+              '',
               style: TextStyle(
                   color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 30),
             CircularProgressIndicator(color: Colors.white),
           ],
         ),

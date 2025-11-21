@@ -6,7 +6,7 @@ class ForgotPasswordScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color.fromARGB(255, 200, 177, 241),
         title: const Text('Forgot Password'),
         centerTitle: true,
       ),
@@ -20,7 +20,7 @@ class ForgotPasswordScreen extends StatelessWidget {
             //  Illustration image (put it in images folder)
             Image.asset(
               'assets/forgot_password.png',
-              height: 250,
+              height: 150,
             ),
 
             const SizedBox(height: 30),
@@ -32,7 +32,7 @@ class ForgotPasswordScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
+                color: Color.fromARGB(253, 255, 255, 255),
               ),
             ),
 
@@ -44,7 +44,7 @@ class ForgotPasswordScreen extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.black54,
+                color: Color.fromARGB(244, 255, 253, 253),
               ),
             ),
 
