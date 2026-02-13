@@ -24,7 +24,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               'Neat and smart uniforms for students and teachers.'),
           buildPage('assets/hotel.png', 'Hotel & Restaurant',
               'Professional uniforms for chefs and service staff.'),
-          buildPage('assets/Constraction Wear.png', 'Construction & Industry',
+          buildPage('assets/Construction Wear.png', 'Construction & Industry',
               'Durable uniforms for industrial and field workers.'),
           buildPage('assets/med.png', 'Medical Professionals',
               'Clean and professional uniforms for hospitals.'),
