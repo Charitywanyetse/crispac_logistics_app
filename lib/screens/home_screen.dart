@@ -4,170 +4,99 @@ import 'products_screen.dart';
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Define purple theme colors
+    final primaryColor = Colors.deepPurple;
+    final lightPurple = Colors.deepPurple.shade100;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 189, 161, 238),
-        title: Text(
-          'Crispac Tailoring',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
-        ),
-        centerTitle: true,
-        elevation: 4,
-      ),
-      body: SingleChildScrollView(
+      backgroundColor: Colors.grey.shade100,
+      body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome Text
+              // 👋 Greeting
               Text(
-                'Welcome to Crispac Tailoring!',
+                'Hi Charity 👋',
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 152, 104, 199),
+                  color: primaryColor,
                 ),
-                textAlign: TextAlign.center,
               ),
-
-              SizedBox(height: 12),
-
-              // Tagline
+              const SizedBox(height: 4),
               Text(
-                'We design and sew quality uniforms for Schools, Hospitals, Hotels & Construction Sites.',
+                'Track and manage your deliveries',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.black87,
-                  height: 1.5,
+                  color: primaryColor.withOpacity(0.7),
                 ),
-                textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 20),
 
-              SizedBox(height: 25),
-
-              // // Logo
-              // Container(
-              //   height: 50,
-              //   child: Image.asset('assets/logo.png', fit: BoxFit.contain),
-              // ),
-
-              // SizedBox(height: 20),
-
-              // MISSION SECTION
-              _sectionTitle("Our Mission"),
-              _sectionBox(
-                "To provide high-quality, durable and professionally tailored uniforms that represent identity, comfort and excellence.",
+              // ➕ Create Order Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // TODO: Navigate to Create Order Screen
+                  },
+                  icon: Icon(Icons.add),
+                  label: Text('Create Order', style: TextStyle(fontSize: 18)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
               ),
+              const SizedBox(height: 20),
 
-              SizedBox(height: 25),
-
-              // VISION SECTION
-              _sectionTitle("Our Vision"),
-              _sectionBox(
-                "To become the leading tailoring company in East Africa, delivering innovation, trust and unmatched craftsmanship.",
-              ),
-
-              SizedBox(height: 35),
-
-              // WHY CHOOSE US
-              _sectionTitle("Why Choose Us"),
-              SizedBox(height: 15),
-              _whyChooseUs(),
-
-              SizedBox(height: 35),
-
-              // SERVICES TITLE
-              _sectionTitle("Our Services"),
-              SizedBox(height: 20),
-
-              GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-                physics: NeverScrollableScrollPhysics(),
-                childAspectRatio: 0.9,
-                children: [
-                  _buildServiceCard(Icons.school, "School Uniforms"),
-                  _buildServiceCard(Icons.local_hospital, "Hospital Gowns"),
-                  _buildServiceCard(Icons.construction, "Construction Wear"),
-                  _buildServiceCard(Icons.hotel, "Hotel Linen & Chef Wear"),
-                  _buildServiceCard(Icons.people, "Corporate Uniforms"),
-                  _buildServiceCard(Icons.design_services, "Custom Tailoring"),
-                ],
-              ),
-
-              SizedBox(height: 35),
-
-              // TESTIMONIALS
-              _sectionTitle("What Our Clients Say"),
-              SizedBox(height: 20),
-              _testimonialCard(
-                "Sarah N.  School Administrator",
-                "Crispac Tailoring delivered our school uniforms with outstanding quality. The stitching, fitting, and fabric were all perfect. Highly reliable!",
-              ),
-              SizedBox(height: 15),
-              _testimonialCard(
-                "Julius K.  Project Supervisor",
-                "Our construction team uniforms were delivered on time and looked very professional. Crispac Tailoring is truly committed to excellence.",
-              ),
-              SizedBox(height: 15),
-              _testimonialCard(
-                "Martha A.  Hotel Manager",
-                "The chef coats and hotel linen were beautifully tailored and durable. Great customer service and value for money!",
-              ),
-
-              SizedBox(height: 40),
-
-              // Action Buttons
+              // 📊 Quick Stats Cards
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                 Expanded(
-  child: ElevatedButton(
-    onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ProductsScreen()),
-      );
-    },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Color.fromARGB(255, 169, 137, 224),
-      padding: EdgeInsets.symmetric(vertical: 15),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-    ),
-    child: Text("View Products", style: TextStyle(fontSize: 16)),
-  ),
-),
-SizedBox(width: 15),
-Expanded(
-  child: ElevatedButton(
-    onPressed: () {},
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Color.fromARGB(255, 122, 209, 168),
-      padding: EdgeInsets.symmetric(vertical: 15),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-    ),
-    child: Text("Request a Quote", style: TextStyle(fontSize: 16)),
-  ),
-),
+                  _buildStatsCard('Pending Orders', 5, lightPurple, primaryColor),
+                  _buildStatsCard('Delivered Orders', 12, lightPurple, primaryColor),
                 ],
               ),
+              const SizedBox(height: 20),
 
-              SizedBox(height: 40),
-
-              // Footer
+              // 📝 Recent Orders List
               Text(
-                "© 2025 Crispac Tailoring",
-                style: TextStyle(color: const Color.fromARGB(255, 15, 15, 15), fontSize: 14),
+                'Recent Orders',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor,
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              Expanded(
+                child: ListView.builder(
+                  itemCount: 5, // Example recent orders
+                  itemBuilder: (context, index) {
+                    return Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      child: ListTile(
+                        leading: Icon(Icons.local_shipping, color: primaryColor),
+                        title: Text('Order #12345'),
+                        subtitle: Text('Status: Pending', style: TextStyle(color: primaryColor)),
+                        trailing: Icon(Icons.arrow_forward_ios, size: 16, color: primaryColor),
+                        onTap: () {
+                          // TODO: Navigate to Order Details
+                        },
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -176,126 +105,35 @@ Expanded(
     );
   }
 
-  // SECTION TITLE WIDGET
-  Widget _sectionTitle(String text) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        color: Color.fromARGB(255, 152, 104, 199),
-
-        ),
-      ),
-    );
-  }
-
-  // SECTION BOX WIDGET
-  Widget _sectionBox(String text) {
+  // Helper: Build purple-themed stats card
+  Widget _buildStatsCard(String title, int count, Color bgColor, Color textColor) {
     return Container(
-      padding: EdgeInsets.all(15),
+      width: (200),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xFFF1E9FF),
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 15, height: 1.5),
-        textAlign: TextAlign.left,
-      ),
-    );
-  }
-
-  // WHY CHOOSE US SECTION
-  Widget _whyChooseUs() {
-    return Column(
-      children: [
-        _chooseUsItem(Icons.check_circle, "High-Quality Tailoring"),
-        SizedBox(height: 12),
-        _chooseUsItem(Icons.speed, "Fast and Reliable Delivery"),
-        SizedBox(height: 12),
-        _chooseUsItem(Icons.attach_money, "Affordable and Transparent Pricing"),
-        SizedBox(height: 12),
-        _chooseUsItem(Icons.groups, "Professional and Skilled Team"),
-      ],
-    );
-  }
-
-  Widget _chooseUsItem(IconData icon, String text) {
-    return Row(
-      children: [
-        CircleAvatar(
-          backgroundColor: Color(0xFF7E49DA).withOpacity(0.1),
-          child: Icon(icon, color: Color(0xFF7E49DA)),
-        ),
-        SizedBox(width: 15),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // TESTIMONIAL CARD
-  Widget _testimonialCard(String name, String review) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Color(0xFFF8F3FF),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Color(0xFF7E49DA).withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            review,
-            style: TextStyle(fontSize: 15, height: 1.5),
+            '$count',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 4),
           Text(
-            "- $name",
+            title,
             style: TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF7E49DA),
+              color: textColor,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // SERVICE CARD WIDGET
-  Widget _buildServiceCard(IconData icon, String title) {
-    return Card(
-      elevation: 4,
-      shadowColor: Colors.deepPurple.withOpacity(0.4),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              backgroundColor: Color(0xFF7E49DA).withOpacity(0.1),
-              radius: 28,
-              child: Icon(icon, size: 32, color: Color.fromARGB(255, 251, 250, 252)),
-            ),
-            SizedBox(height: 15),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-            )
-          ],
-        ),
       ),
     );
   }

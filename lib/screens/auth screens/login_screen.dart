@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'registeration_screen.dart';
-import '../home_screen.dart';
+import '../main_screen.dart';
 import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -42,14 +42,11 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  void _login() {
-    if (_formKey.currentState!.validate()) {
-      Navigator.pushReplacement(
-        context,
-        _animatedRoute(HomeScreen()),
-      );
-    }
+void _login() {
+  if (_formKey.currentState!.validate()) {
+    Navigator.pushReplacementNamed(context, '/main');
   }
+}
 
   //  Animated slide transition between pages
   Route _animatedRoute(Widget page) {
