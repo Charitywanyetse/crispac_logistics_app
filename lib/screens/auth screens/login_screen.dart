@@ -44,7 +44,11 @@ class _LoginScreenState extends State<LoginScreen>
 
 void _login() {
   if (_formKey.currentState!.validate()) {
-    Navigator.pushReplacementNamed(context, '/main');
+    Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (_) => MainScreen()),
+);
+
   }
 }
 

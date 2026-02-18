@@ -28,7 +28,7 @@ class _OrdersScreenState extends State<OrdersScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color.fromARGB(255, 168, 122, 248),
         title: Text('Orders'),
         bottom: TabBar(
           controller: _tabController,
@@ -47,7 +47,7 @@ class _OrdersScreenState extends State<OrdersScreen>
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ListTile(
-                  leading: Icon(Icons.local_shipping, color: Colors.deepPurple),
+                  leading: Icon(Icons.local_shipping, color: const Color.fromARGB(255, 170, 122, 253)),
                   title: Text('Order #${1000 + index}'),
                   subtitle: Text('Status: $status'),
                   trailing: Icon(Icons.arrow_forward_ios, size: 16),

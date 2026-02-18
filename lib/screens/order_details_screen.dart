@@ -10,7 +10,7 @@ class OrderDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Order #$orderId'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color.fromARGB(255, 167, 120, 247),
       ),
       body: Padding(
         padding: EdgeInsets.all(16),

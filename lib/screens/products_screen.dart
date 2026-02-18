@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'product_details_screen.dart'; // Make sure this file exists
 
 class ProductsScreen extends StatelessWidget {
   @override
@@ -15,7 +16,6 @@ class ProductsScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-
       body: Padding(
         padding: EdgeInsets.all(15),
         child: GridView.count(
@@ -24,19 +24,19 @@ class ProductsScreen extends StatelessWidget {
           mainAxisSpacing: 15,
           childAspectRatio: 0.75,
           children: [
-            productCard("School Uniform", "assets/School Uniform.png", 45000),
-            productCard("Hospital Gown", "assets/Hospital Gown.png", 38000),
-            productCard("Construction Wear", "assets/Construction wear.png", 60000),
-            productCard("Chef Coat", "assets/Chef Coat.jpg", 55000),
-            productCard("Corporate Suit", "assets/Corporate Suit.png", 120000),
-            productCard("Custom Designs", "assets/Custom Designs.png", 80000),
+            productCard(context, "School Uniform", "assets/School Uniform.png", 45000),
+            productCard(context, "Hospital Gown", "assets/Hospital Gown.png", 38000),
+            productCard(context, "Construction Wear", "assets/Construction wear.png", 60000),
+            productCard(context, "Chef Coat", "assets/Chef Coat.jpg", 55000),
+            productCard(context, "Corporate Suit", "assets/Corporate Suit.png", 120000),
+            productCard(context, "Custom Designs", "assets/Custom Designs.png", 80000),
           ],
         ),
       ),
     );
   }
 
-  Widget productCard(String name, String image, int price) {
+  Widget productCard(BuildContext context, String name, String image, int price) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -88,12 +88,23 @@ class ProductsScreen extends StatelessWidget {
 
           Spacer(),
 
-          // Add to Cart Button
+          // View Details Button
           Container(
             width: double.infinity,
             margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProductDetailsScreen(
+                      name: name,
+                      image: image,
+                      price: price,
+                    ),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF7E49DA),
                 padding: EdgeInsets.symmetric(vertical: 8),
@@ -101,7 +112,7 @@ class ProductsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: Text(
+              child: const Text(
                 "View Details",
                 style: TextStyle(fontSize: 14, color: Colors.white),
               ),
@@ -112,3 +123,4 @@ class ProductsScreen extends StatelessWidget {
     );
   }
 }
+

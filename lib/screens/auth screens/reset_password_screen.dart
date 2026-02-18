@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   @override
@@ -10,19 +11,42 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController _confirmPasswordController = TextEditingController();
 
   void _savePassword() {
-    if (_newPasswordController.text.isEmpty || _confirmPasswordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please fill all fields')));
+    String newPass = _newPasswordController.text;
+    String confirmPass = _confirmPasswordController.text;
+
+    if (newPass.isEmpty || confirmPass.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all fields')),
+      );
       return;
     }
 
-    if (_newPasswordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Passwords do not match')));
+    if (newPass != confirmPass) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
       return;
     }
 
-    // TODO: Add real password reset logic
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Password reset successfully')));
-    Navigator.pop(context); // Go back to login
+    // TODO: Here you can call your API to save password
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Password reset successfully')),
+    );
+
+    // ✅ Navigate to LoginScreen and remove all previous screens
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => LoginScreen()),
+      (route) => false,
+    );
+  }
+
+  @override
+  void dispose() {
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -30,9 +54,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     final primaryColor = Colors.deepPurple;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Reset Password'), backgroundColor: primaryColor),
+      appBar: AppBar(
+        title: const Text('Reset Password'),
+        backgroundColor: primaryColor,
+      ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             TextField(
@@ -61,10 +88,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _savePassword,
-                child: Text('Save', style: TextStyle(fontSize: 16)),
+                child: const Text('Save', style: TextStyle(fontSize: 16)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
-                  padding: EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
@@ -75,3 +102,4 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     );
   }
 }
+

@@ -13,13 +13,13 @@ class NotificationsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Notifications'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color.fromARGB(255, 169, 122, 250),
       ),
       body: ListView.builder(
         itemCount: notifications.length,
         itemBuilder: (context, index) {
           return ListTile(
-            leading: Icon(Icons.notifications, color: Colors.deepPurple),
+            leading: Icon(Icons.notifications, color: const Color.fromARGB(255, 167, 121, 247)),
             title: Text(notifications[index]),
           );
         },

@@ -5,7 +5,7 @@ import 'dart:async';
 class VerificationScreen extends StatefulWidget {
   final String email;
 
-  VerificationScreen({required this.email});
+  const VerificationScreen({required this.email});
 
   @override
   _VerificationScreenState createState() => _VerificationScreenState();
@@ -15,7 +15,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
   final TextEditingController _otpController = TextEditingController();
   bool _canResend = false;
   int _secondsRemaining = 30;
-  late final Timer _timer;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -24,76 +24,125 @@ class _VerificationScreenState extends State<VerificationScreen> {
   }
 
   void _startCountdown() {
-    _canResend = false;
-    _secondsRemaining = 30;
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_secondsRemaining > 0) {
+    setState(() {
+      _canResend = false;
+      _secondsRemaining = 30;
+    });
+
+    _timer?.cancel();
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsRemaining > 0) {
+        setState(() {
           _secondsRemaining--;
-        } else {
+        });
+      } else {
+        setState(() {
           _canResend = true;
-          _timer.cancel();
-        }
-      });
+        });
+        timer.cancel();
+      }
     });
   }
 
   @override
   void dispose() {
     _otpController.dispose();
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
   void _verifyOTP() {
-    // TODO: Add real verification logic
+    if (_otpController.text.isEmpty ||
+        _otpController.text.length < 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter valid OTP')),
+      );
+      return;
+    }
+
+    // TODO: Add backend OTP verification later
+
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => ResetPasswordScreen()),
+      MaterialPageRoute(
+        builder: (_) => ResetPasswordScreen(),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Colors.deepPurple;
+    final primaryColor = const Color.fromARGB(255, 142, 97, 219);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Verification'), backgroundColor: primaryColor),
+      appBar: AppBar(
+        title: const Text('Verification'),
+        backgroundColor: primaryColor,
+      ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            const SizedBox(height: 10),
             Text(
-              'Enter the 4–6 digit code sent to ${widget.email}',
-              style: TextStyle(fontSize: 16),
+              'Enter the 4–6 digit code sent to\n${widget.email}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
+
+            // 🔥 OTP Field (styled)
             TextField(
               controller: _otpController,
               keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              maxLength: 6,
               decoration: InputDecoration(
-                hintText: 'Enter OTP',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                counterText: "",
+                hintText: "------",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 filled: true,
                 fillColor: Colors.grey.shade100,
               ),
+              style: const TextStyle(
+                letterSpacing: 8,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(height: 16),
+
+            const SizedBox(height: 20),
+
+            // 🔥 Resend & Verify Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _canResend
                     ? TextButton(
-                        onPressed: () {
-                          _startCountdown();
-                        },
-                        child: Text('Resend Code', style: TextStyle(color: primaryColor)),
+                        onPressed: _startCountdown,
+                        child: Text(
+                          'Resend Code',
+                          style: TextStyle(color: primaryColor),
+                        ),
                       )
-                    : Text('Resend in $_secondsRemaining s', style: TextStyle(color: Colors.grey)),
+                    : Text(
+                        'Resend in $_secondsRemaining s',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+
                 ElevatedButton(
                   onPressed: _verifyOTP,
-                  child: Text('Verify'),
-                  style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                  ),
+                  child: const Text(
+                    'Verify',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),

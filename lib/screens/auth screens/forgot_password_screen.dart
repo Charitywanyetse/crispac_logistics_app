@@ -1,12 +1,48 @@
 import 'package:flutter/material.dart';
+import 'verification_screen.dart'; // make sure path is correct
 
-class ForgotPasswordScreen extends StatelessWidget {
+class ForgotPasswordScreen extends StatefulWidget {
+  @override
+  _ForgotPasswordScreenState createState() => _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final TextEditingController _phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  void _sendCode() {
+    if (_phoneController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Enter phone number")),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Code sent successfully")),
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => VerificationScreen(
+          email: _phoneController.text,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 200, 177, 241),
+        backgroundColor: const Color(0xFF7E49DA),
         title: const Text('Forgot Password'),
         centerTitle: true,
       ),
@@ -16,42 +52,29 @@ class ForgotPasswordScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 30),
-
-            //  Illustration image (put it in images folder)
             Image.asset(
               'assets/forgot_password.png',
               height: 150,
             ),
-
             const SizedBox(height: 30),
-
-            // Title
             const Text(
               'Forgot your password?',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(253, 255, 255, 255),
+                color: Colors.deepPurple,
               ),
             ),
-
             const SizedBox(height: 10),
-
-            //  Subtitle
             const Text(
               'No worries! Enter your phone number and we’ll send you an SMS with a reset code.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Color.fromARGB(244, 255, 253, 253),
-              ),
+              style: TextStyle(fontSize: 16),
             ),
-
             const SizedBox(height: 40),
-
-            //  Phone Number Field
             TextField(
+              controller: _phoneController,
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
                 labelText: 'Phone Number',
@@ -62,19 +85,9 @@ class ForgotPasswordScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 30),
-
-            //  Send Code Button
             ElevatedButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Verification code sent to your phone number!'),
-                  ),
-                );
-              },
+              onPressed: _sendCode,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 minimumSize: const Size(double.infinity, 50),
@@ -87,10 +100,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
-
             const SizedBox(height: 25),
-
-            //Back to Login
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

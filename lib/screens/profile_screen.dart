@@ -7,7 +7,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color.fromARGB(255, 165, 115, 252),
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
@@ -21,9 +21,9 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text('Charity Wanyetse', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text('charity@example.com', style: TextStyle(color: Colors.grey[700])),
+            Text('charity@example.com', style: TextStyle(color: const Color.fromARGB(255, 247, 244, 244))),
             const SizedBox(height: 8),
-            Text('+256 76230684', style: TextStyle(color: Colors.grey[700])),
+            Text('+256 76230684', style: TextStyle(color: const Color.fromARGB(255, 252, 249, 249))),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {

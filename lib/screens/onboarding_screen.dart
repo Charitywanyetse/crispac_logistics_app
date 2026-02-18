@@ -84,7 +84,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.deepPurple,
+              color: Color.fromARGB(255, 173, 126, 255),
             ),
           ),
           const SizedBox(height: 15),
