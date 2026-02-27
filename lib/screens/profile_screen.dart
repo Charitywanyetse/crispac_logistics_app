@@ -32,6 +32,9 @@ class ProfileScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (_) => SettingsScreen()),
                 );
               },
+
+                  
+                  
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 padding: EdgeInsets.symmetric(horizontal: 40, vertical: 14),
