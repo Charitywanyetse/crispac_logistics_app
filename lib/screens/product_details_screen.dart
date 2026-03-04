@@ -151,7 +151,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 },
                 child: const Text("Add to Cart"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: const Color.fromARGB(255, 246, 246, 247),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
