@@ -1,10 +1,10 @@
 // lib/providers/dashboard_provider.dart
 
 import 'package:flutter/material.dart';
-import '../services/dashboard_service.dart';
+// import '../services/dashboard_service.dart'; // Temporarily disabled
 
 class DashboardProvider with ChangeNotifier {
-  final DashboardService _dashboardService = DashboardService();
+  // final DashboardService _dashboardService = DashboardService(); // Not used for dummy data
   
   bool _isLoading = false;
   String? _error;
@@ -32,6 +32,50 @@ class DashboardProvider with ChangeNotifier {
     _error = null;
     notifyListeners();
     
+    // Simulate a short network delay
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    // Dummy data – adjust numbers as you like
+    _dashboardData = {
+      'data': {
+        'summary': {
+          'total_orders': 24,
+          'total_revenue': 4520.00,
+          'total_customers': 18,
+          'total_products': 42,
+          'today_orders': 5,
+          'today_revenue': 890.00,
+        },
+        'monthly_sales': [
+          {'month': 'Jan', 'total_sales': 4200},
+          {'month': 'Feb', 'total_sales': 3800},
+          {'month': 'Mar', 'total_sales': 5100},
+          {'month': 'Apr', 'total_sales': 4800},
+          {'month': 'May', 'total_sales': 6200},
+          {'month': 'Jun', 'total_sales': 5900},
+        ],
+        'recent_orders': [
+          {'order_number': 'ORD-001', 'customer_name': 'John Doe', 'status': 'Delivered', 'total': 120.00},
+          {'order_number': 'ORD-002', 'customer_name': 'Jane Smith', 'status': 'Pending', 'total': 85.50},
+          {'order_number': 'ORD-003', 'customer_name': 'Bob Johnson', 'status': 'Processing', 'total': 210.00},
+          {'order_number': 'ORD-004', 'customer_name': 'Alice Brown', 'status': 'Delivered', 'total': 45.00},
+          {'order_number': 'ORD-005', 'customer_name': 'Charlie Wilson', 'status': 'Pending', 'total': 175.00},
+        ],
+        'popular_products': [
+          {'name': 'Product A', 'order_count': 24, 'stock': 45},
+          {'name': 'Product B', 'order_count': 18, 'stock': 8},
+          {'name': 'Product C', 'order_count': 12, 'stock': 3},
+          {'name': 'Product D', 'order_count': 10, 'stock': 20},
+          {'name': 'Product E', 'order_count': 8, 'stock': 15},
+        ],
+      }
+    };
+    
+    _isLoading = false;
+    notifyListeners();
+    
+    // Original real API call (commented out for now)
+    /*
     try {
       final data = await _dashboardService.getDashboardData();
       _dashboardData = data;
@@ -42,6 +86,7 @@ class DashboardProvider with ChangeNotifier {
       _error = e.toString();
       notifyListeners();
     }
+    */
   }
   
   void refresh() {

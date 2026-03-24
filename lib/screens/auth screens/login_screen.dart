@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'registeration_screen.dart';
 import '../main_screen.dart';
 import 'forgot_password_screen.dart';
@@ -11,8 +14,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController(); // changed from phone to email
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
@@ -20,39 +24,69 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
     );
-
     _slideAnimation =
         Tween(begin: const Offset(0, 0.3), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
-
     _controller.forward();
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _phoneController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-void _login() {
-  if (_formKey.currentState!.validate()) {
-    Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(builder: (_) => MainScreen()),
-);
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
 
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await http.post(
+       Uri.parse('http://localhost:8000/api/auth/login'),// use localhost for web
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text,
+        }),
+      );
+
+      print('Login response: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', data['data']['token']);
+
+        // Navigate to main screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => MainScreen()),
+        );
+      } else {
+        _showError('Login failed. Check your credentials.');
+      }
+    } catch (e) {
+      _showError('Network error: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
-}
 
-  //  Animated slide transition between pages
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
   Route _animatedRoute(Widget page) {
     return PageRouteBuilder(
       transitionDuration: const Duration(milliseconds: 500),
@@ -62,7 +96,6 @@ void _login() {
           begin: const Offset(1.0, 0.0),
           end: Offset.zero,
         ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutQuad));
-
         return SlideTransition(position: offsetAnimation, child: child);
       },
     );
@@ -82,35 +115,17 @@ void _login() {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // // 🔹 Logo
-                  // Image.asset('assets/logo.png', height: 85),
-                  // const SizedBox(height: 20),
-                      //  Illustration image (put it in images folder)
-            Image.asset(
-              'assets/regi.png',
-              height: 150,
-            ),
+                  Image.asset('assets/regi.png', height: 150),
+                  const SizedBox(height: 30),
 
-            const SizedBox(height: 30),
-                  // 🔹 App name
-                  const Text(
-                    '',
-                    style: TextStyle(
-                      color: Colors.deepPurple,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-
-                  // 🔹 Phone field
+                  // Email field (changed from phone)
                   TextFormField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Phone Number',
-                      prefixIcon: const Icon(Icons.phone_android),
-                      hintText: '+256 76230684',
+                      labelText: 'Email',
+                      prefixIcon: const Icon(Icons.email),
+                      hintText: 'you@example.com',
                       filled: true,
                       fillColor: Colors.grey.shade100,
                       border: OutlineInputBorder(
@@ -119,11 +134,11 @@ void _login() {
                       ),
                     ),
                     validator: (value) =>
-                        value!.isEmpty ? 'Enter your phone number' : null,
+                        value == null || value.isEmpty ? 'Enter your email' : null,
                   ),
                   const SizedBox(height: 20),
 
-                  // 🔹 Password field
+                  // Password field
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
@@ -138,11 +153,11 @@ void _login() {
                       ),
                     ),
                     validator: (value) =>
-                        value!.isEmpty ? 'Enter your password' : null,
+                        value == null || value.isEmpty ? 'Enter your password' : null,
                   ),
                   const SizedBox(height: 10),
 
-                  // 🔹 Forgot password
+                  // Forgot password
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -158,25 +173,27 @@ void _login() {
                   ),
                   const SizedBox(height: 20),
 
-                  // 🔹 Login button
-                  ElevatedButton(
-                    onPressed: _login,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-                      minimumSize: const Size(double.infinity, 55),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Login',
-                      style: TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-                  ),
+                  // Login button with loading indicator
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: _login,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            minimumSize: const Size(double.infinity, 55),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Login',
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
+                        ),
 
                   const SizedBox(height: 30),
 
-                  // 🔹 Register link
+                  // Register link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

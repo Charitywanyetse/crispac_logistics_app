@@ -7,10 +7,10 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   // ===== USER DATA =====
-  String _userName = 'John Doe';
-  String _userEmail = 'john.doe@email.com';
-  String _userPhone = '+1 (555) 123-4567';
-  String _userAddress = '123 Main St, New York, NY 10001';
+  String _userName = 'wanyetse charity';
+  String _userEmail = 'wanyetse.charity@email.com';
+  String _userPhone = '+256 (555) 123-4567';
+  String _userAddress = 'uganda,kampala, bukoto';
   
   // ===== NOTIFICATION SETTINGS =====
   bool _pushNotifications = true;
