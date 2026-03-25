@@ -1,313 +1,241 @@
 import 'package:flutter/material.dart';
-import 'settings_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'delivery_history_screen.dart';
+import 'support_contact_screen.dart';
+import 'settings_screen.dart'; // your existing settings screen
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  // Mock stats – replace with real data from backend later
+  int _totalDeliveries = 24;
+  double _rating = 4.8;
+  int _onTimePercentage = 98;
+
+  // User info – will come from backend
+  String _userName = 'John Doe';
+  String _userEmail = 'john@example.com';
+
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // remove token and all saved data
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text('Profile'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Color(0xFF915BEE),
         elevation: 0,
       ),
       body: ListView(
+        padding: EdgeInsets.all(16),
         children: [
-          // ===== PROFILE HEADER =====
-          Container(
-            padding: EdgeInsets.all(20),
-            child: Row(
-              children: [
-                // Profile Picture with camera icon overlay
-                Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 45,
-                      backgroundImage: NetworkImage('https://via.placeholder.com/150'), // Replace with user's image
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey.shade300, width: 2),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: Icon(Icons.camera_alt, color: Colors.white, size: 16),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(width: 20),
-                
-                // User Info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'John Doe', // Replace with actual user name
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'john.doe@email.com', // Replace with actual email
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        '+1 (555) 123-4567', // Replace with actual phone
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
+          // Stats Cards Row
+          Row(
+            children: [
+              _buildStatCard('Deliveries', _totalDeliveries.toString(), Icons.local_shipping),
+              SizedBox(width: 12),
+              _buildStatCard('Rating', _rating.toString(), Icons.star, suffix: ' ★'),
+              SizedBox(width: 12),
+              _buildStatCard('On Time', '$_onTimePercentage%', Icons.timer),
+            ],
+          ),
+          SizedBox(height: 24),
+
+          // User Info Card (optional)
+          Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Color(0xFF915BEE),
+                    child: Icon(Icons.person, size: 32, color: Colors.white),
                   ),
-                ),
-              ],
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _userName,
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        Text(_userEmail, style: TextStyle(color: Colors.grey[600])),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () {
+                      // Navigate to edit profile screen (could be a dialog or new screen)
+                      _showEditProfileDialog();
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-          
-          Divider(thickness: 8, color: Colors.grey[100]),
-          
-          // ===== STATS CARDS =====
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    icon: Icons.inventory,
-                    value: '24',
-                    label: 'Deliveries',
-                    color: Colors.blue,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatCard(
-                    icon: Icons.star,
-                    value: '4.8',
-                    label: 'Rating',
-                    color: Colors.amber,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatCard(
-                    icon: Icons.timer,
-                    value: '98%',
-                    label: 'On Time',
-                    color: Colors.green,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          Divider(thickness: 8, color: Colors.grey[100]),
-          
-          // ===== PROFILE MENU ITEMS =====
+          SizedBox(height: 16),
+
+          // Menu Items
           _buildMenuItem(
             icon: Icons.person_outline,
             title: 'Edit Profile',
             subtitle: 'Update your personal information',
-            onTap: () {
-              // Navigate to edit profile screen
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen()));
-            },
+            onTap: () => _showEditProfileDialog(),
           ),
-          
-          // _buildMenuItem(
-          //   icon: Icons.location_on_outline,
-          //   title: 'Saved Addresses',
-          //   subtitle: 'Home, Work, and other addresses',
-          //   onTap: () {
-          //     // Navigate to addresses screen
-          //     //  Navigator.push(context, MaterialPageRoute(builder: (context) => AddressesScreen()));
-          //   },
-          // ),
-          
           _buildMenuItem(
-            icon: Icons.payment_outlined,
+            icon: Icons.payment,
             title: 'Payment Methods',
             subtitle: 'Manage your payment options',
             onTap: () {
-              // Navigate to payment methods
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentMethodsScreen()));
+              // TODO: navigate to payment methods screen
             },
           ),
-          
           _buildMenuItem(
             icon: Icons.history,
             title: 'Delivery History',
             subtitle: 'View all your past deliveries',
             onTap: () {
-              // Navigate to delivery history
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => DeliveryHistoryScreen()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => DeliveryHistoryScreen()),
+              );
             },
           ),
-          
           _buildMenuItem(
-            icon: Icons.help_outline,
+            icon: Icons.support_agent,
             title: 'Help & Support',
             subtitle: 'Get assistance with your deliveries',
             onTap: () {
-              // Navigate to help center
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => HelpSupportScreen()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SupportContactScreen()),
+              );
             },
           ),
-          
-          Divider(thickness: 8, color: Colors.grey[100]),
-          
-          // ===== SETTINGS BUTTON (Links to Settings Screen) =====
           _buildMenuItem(
             icon: Icons.settings,
             title: 'Settings',
             subtitle: 'App preferences, notifications, privacy',
-            showArrow: true,
-            isSettings: true,
             onTap: () {
-              // 👈 THIS OPENS THE SETTINGS SCREEN
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => SettingsScreen()),
+                MaterialPageRoute(builder: (_) => SettingsScreen()),
               );
             },
           ),
-          
-          // ===== LOGOUT BUTTON =====
-          Container(
-            margin: EdgeInsets.all(16),
+          Divider(height: 32),
+          // Log Out Button
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ElevatedButton(
-              onPressed: () {
-                _showLogoutDialog(context);
-              },
+              onPressed: _logout,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.shade50,
-                foregroundColor: Colors.red,
-                elevation: 0,
-                padding: EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                backgroundColor: Colors.red.shade700,
+                minimumSize: Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('Log Out', style: TextStyle(fontSize: 16)),
+              child: Text('Log Out', style: TextStyle(color: Colors.white)),
             ),
           ),
-          
-          SizedBox(height: 20),
+          SizedBox(height: 40),
         ],
       ),
     );
   }
-  
-  Widget _buildStatCard({required IconData icon, required String value, required String label, required Color color}) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 28),
-          SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+
+  Widget _buildStatCard(String label, String value, IconData icon, {String suffix = ''}) {
+    return Expanded(
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 2,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            children: [
+              Icon(icon, size: 28, color: Color(0xFF915BEE)),
+              SizedBox(height: 8),
+              Text(
+                value + suffix,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Text(label, style: TextStyle(color: Colors.grey[600])),
+            ],
           ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
-  
+
   Widget _buildMenuItem({
     required IconData icon,
     required String title,
-    String? subtitle,
+    required String subtitle,
     required VoidCallback onTap,
-    bool showArrow = true,
-    bool isSettings = false,
   }) {
-    return ListTile(
-      leading: Container(
-        padding: EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isSettings ? Colors.blue.shade50 : Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
-          icon, 
-          color: isSettings ? Colors.blue : Colors.grey.shade700,
-          size: 22,
-        ),
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Icon(icon, color: Color(0xFF915BEE)),
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.w500)),
+        subtitle: Text(subtitle, style: TextStyle(fontSize: 12)),
+        trailing: Icon(Icons.chevron_right, color: Colors.grey),
+        onTap: onTap,
       ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: isSettings ? FontWeight.w600 : FontWeight.normal,
-          color: isSettings ? Colors.blue : Colors.black,
-        ),
-      ),
-      subtitle: subtitle != null ? Text(subtitle, style: TextStyle(fontSize: 12)) : null,
-      trailing: showArrow ? Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey) : null,
-      onTap: onTap,
     );
   }
-  
-  void _showLogoutDialog(BuildContext context) {
+
+  void _showEditProfileDialog() {
+    final nameController = TextEditingController(text: _userName);
+    final emailController = TextEditingController(text: _userEmail);
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Log Out'),
-          content: Text('Are you sure you want to log out?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+      builder: (_) => AlertDialog(
+        title: Text('Edit Profile'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(labelText: 'Name'),
             ),
-            TextButton(
-              onPressed: () {
-                // Perform logout
-                Navigator.pop(context);
-              },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text('Log Out'),
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(labelText: 'Email'),
             ),
           ],
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _userName = nameController.text;
+                _userEmail = emailController.text;
+              });
+              Navigator.pop(context);
+              // TODO: send updated data to backend
+            },
+            child: Text('Save'),
+          ),
+        ],
+      ),
     );
   }
 }
-
-// Make sure to import SettingsScreen at the top
-// import 'settings_screen.dart';

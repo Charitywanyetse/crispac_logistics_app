@@ -1,5 +1,7 @@
+import 'package:crispac_logistics/screens/Dashboard/DashboardScreen.dart';
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import '../screens/Dashboard/DashboardScreen.dart'; // adjust path
+// import 'home_screen.dart';
 import 'orders_screen.dart';
 import 'notifications_screen.dart';
 import 'profile_screen.dart';
@@ -14,7 +16,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
 final List<Widget> _screens = [
-  HomeScreen(),
+  DashboardScreen(),
   OrdersScreen(),
   ProductsScreen(),
   NotificationsScreen(),
@@ -35,7 +37,7 @@ bottomNavigationBar: BottomNavigationBar(
   items: const [
     BottomNavigationBarItem(
       icon: Icon(Icons.home),
-      label: 'Home',
+      label: 'Dashboard',
     ),
     BottomNavigationBarItem(
       icon: Icon(Icons.local_shipping),

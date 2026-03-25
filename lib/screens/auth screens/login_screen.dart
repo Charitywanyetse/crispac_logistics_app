@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'registeration_screen.dart';
 import '../main_screen.dart';
 import 'forgot_password_screen.dart';
+import '/config/api.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -50,7 +51,9 @@ class _LoginScreenState extends State<LoginScreen>
 
     try {
       final response = await http.post(
-       Uri.parse('http://localhost:8000/api/auth/login'),// use localhost for web
+     // use localhost for web
+      //  Uri.parse('http://localhost:8000/api/login'),
+       Uri.parse('${ApiConfig.baseUrl}/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text.trim(),

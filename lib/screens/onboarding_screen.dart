@@ -41,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Container(
                 width: double.infinity,
                 height: 50,
-                color: const Color.fromARGB(255, 173, 139, 233),
+                color: const Color.fromARGB(255, 85, 7, 219),
                 alignment: Alignment.center,
                 child: const Text(
                   'Get Started',
@@ -84,7 +84,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 173, 126, 255),
+              color: Color.fromARGB(255, 93, 4, 247),
             ),
           ),
           const SizedBox(height: 15),
