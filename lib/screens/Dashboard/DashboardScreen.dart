@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/dashboard_service.dart';
+import 'package:intl/intl.dart';
+import '../../services/dashboard_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -12,12 +13,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Color(0xFFF8F9FA),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _dashboardService.getDashboardData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF915BEE)),
+                  ),
+                  SizedBox(height: 16),
+                  Text('Loading your tailoring dashboard...'),
+                ],
+              ),
+            );
           }
           if (snapshot.hasError) {
             return Center(
@@ -29,7 +41,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Text('Error: ${snapshot.error}'),
                   SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => setState(() {}), // retry
+                    onPressed: () => setState(() {}),
                     child: Text('Retry'),
                   ),
                 ],
@@ -41,18 +53,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
           final user = data['user'] as Map<String, dynamic>? ?? {};
           final stats = data['stats'] as Map<String, dynamic>? ?? {};
           final recentOrders = data['recent_orders'] as List? ?? [];
+          final productionStatus = data['production_status'] as List? ?? [];
+          final fabricAlerts = data['fabric_alerts'] as List? ?? [];
+          final deadlines = data['upcoming_deadlines'] as List? ?? [];
 
           return RefreshIndicator(
             onRefresh: () async {
               setState(() {});
-              // Re-fetch (FutureBuilder will rebuild)
             },
             child: ListView(
-              padding: EdgeInsets.only(top: 8, bottom: 32),
+              padding: EdgeInsets.only(bottom: 80),
               children: [
-                // Welcome Header
+                // Header with tailor shop branding
                 Container(
-                  padding: EdgeInsets.fromLTRB(20, 24, 20, 16),
+                  padding: EdgeInsets.fromLTRB(20, 40, 20, 24),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Color(0xFF915BEE), Color(0xFF6B48FF)],
@@ -60,35 +74,107 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(24),
-                      bottomRight: Radius.circular(24),
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30),
                     ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Hello,',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white70,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Tailor Dashboard',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white70,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Welcome back,',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              Text(
+                                user['name'] ?? 'Tailor',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white24,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Icon(
+                              Icons.brush,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        user['name'] ?? 'User',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
+                      SizedBox(height: 16),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
                           color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        user['email'] ?? '',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white70,
+                        child: Row(
+                          children: [
+                            Icon(Icons.store, color: Color(0xFF915BEE)),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Crispac Tailoring',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Premium Custom Garments',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                'Active',
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -96,11 +182,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 SizedBox(height: 24),
 
-                // Stats Section
+                // Key Metrics - Tailoring Specific
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
-                    'Your Activity',
+                    'Tailoring Metrics',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -111,41 +197,293 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 SizedBox(height: 12),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
+                  child: GridView.count(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 1.5,
                     children: [
-                      _buildStatCard(
-                        'Deliveries',
-                        (stats['deliveries'] ?? 0).toString(),
-                        Icons.local_shipping,
+                      _buildMetricCard(
+                        'Active Orders',
+                        (stats['active_orders'] ?? 12).toString(),
+                        Icons.inventory,
                         Color(0xFF915BEE),
+                        '+3 this week',
                       ),
-                      SizedBox(width: 12),
-                      _buildStatCard(
-                        'Rating',
-                        (stats['rating'] ?? 0).toString(),
-                        Icons.star,
-                        Colors.amber,
-                      ),
-                      SizedBox(width: 12),
-                      _buildStatCard(
-                        'On Time',
-                        '${stats['on_time'] ?? 0}%',
-                        Icons.timer,
+                      _buildMetricCard(
+                        'Completed',
+                        (stats['completed_orders'] ?? 28).toString(),
+                        Icons.check_circle,
                         Colors.green,
+                        '+12 this month',
+                      ),
+                      _buildMetricCard(
+                        'Revenue',
+                        'UGX ${(stats['revenue'] ?? 1250000).toString()}',
+                        Icons.attach_money,
+                        Colors.orange,
+                        '+15% vs last month',
+                      ),
+                      _buildMetricCard(
+                        'Garments',
+                        (stats['garments_made'] ?? 156).toString(),
+                        Icons.shopping_bag,
+                        Colors.blue,
+                        '+45 this month',
                       ),
                     ],
                   ),
                 ),
                 SizedBox(height: 24),
 
-                // Recent Orders Section
+                // Production Status
+                if (productionStatus.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Production Status',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text('View All'),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (productionStatus.isNotEmpty)
+                  SizedBox(height: 12),
+                if (productionStatus.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      height: 120,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: productionStatus.length,
+                        separatorBuilder: (_, __) => SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final item = productionStatus[index];
+                          return _buildProductionCard(
+                            item['order_id'] ?? 'ORD-001',
+                            item['garment'] ?? 'Shirt',
+                            item['status'] ?? 'Cutting',
+                            item['progress'] ?? 30,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+
+                // Fabric Alerts & Deadlines Row
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Recent Orders',
+                        'Fabric Alerts',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      if (fabricAlerts.isNotEmpty)
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${fabricAlerts.length} items',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 12),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: fabricAlerts.isEmpty
+                      ? Container(
+                          padding: EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.check_circle, color: Colors.green),
+                              SizedBox(width: 12),
+                              Text('All fabrics in stock'),
+                            ],
+                          ),
+                        )
+                      : Column(
+                          children: fabricAlerts.map<Widget>((alert) {
+                            return Container(
+                              margin: EdgeInsets.only(bottom: 8),
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.red.shade100),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.warning, color: Colors.orange),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          alert['fabric'] ?? 'Fabric',
+                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          'Low stock: ${alert['quantity']} yards remaining',
+                                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {},
+                                    child: Text('Order'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                ),
+                SizedBox(height: 16),
+
+                // Upcoming Deadlines
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Upcoming Deadlines',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text('Calendar'),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 12),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: deadlines.isEmpty
+                      ? Container(
+                          padding: EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Center(
+                            child: Text('No upcoming deadlines'),
+                          ),
+                        )
+                      : Column(
+                          children: deadlines.map<Widget>((deadline) {
+                            return Container(
+                              margin: EdgeInsets.only(bottom: 8),
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey.shade200),
+                              ),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: Color(0xFF915BEE).withOpacity(0.1),
+                                    child: Icon(
+                                      Icons.event,
+                                      size: 20,
+                                      color: Color(0xFF915BEE),
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          deadline['order_id'] ?? 'Order',
+                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          deadline['garment'] ?? 'Garment',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        deadline['due_date'] ?? 'No date',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: _getDeadlineColor(deadline['days_left']),
+                                        ),
+                                      ),
+                                      Text(
+                                        '${deadline['days_left']} days left',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: _getDeadlineColor(deadline['days_left']),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                ),
+                SizedBox(height: 16),
+
+                // Recent Garment Orders
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Recent Garment Orders',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -154,9 +492,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          // Navigate to Orders screen
-                          // If using bottom navigation, you could change index
-                          // For now, just a placeholder
+                          // Navigate to orders screen
                         },
                         child: Text('See All'),
                       ),
@@ -199,10 +535,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ),
                               title: Text(
-                                'Order #${order['id']}',
+                                '${order['garment'] ?? 'Garment'} - ${order['customer'] ?? 'Customer'}',
                                 style: TextStyle(fontWeight: FontWeight.w600),
                               ),
-                              subtitle: Text('Total: UGX ${order['total']}'),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Order #${order['id']}'),
+                                  Text(
+                                    'Total: UGX ${order['total']}',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
                               trailing: Container(
                                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
@@ -220,39 +565,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ),
                               onTap: () {
                                 // Navigate to order details
-                                // Navigator.push(...);
                               },
                             ),
                           );
                         },
                       ),
-                SizedBox(height: 24),
-
-                // Quick Actions (optional)
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    'Quick Actions',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 12),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      _buildQuickAction(Icons.support_agent, 'Support', () {}),
-                      SizedBox(width: 12),
-                      _buildQuickAction(Icons.settings, 'Settings', () {}),
-                      SizedBox(width: 12),
-                      _buildQuickAction(Icons.history, 'History', () {}),
-                    ],
-                  ),
-                ),
               ],
             ),
           );
@@ -261,78 +578,127 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 28, color: color),
-            SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickAction(IconData icon, String label, VoidCallback onTap) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
+  Widget _buildMetricCard(String label, String value, IconData icon, Color color, String trend) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
           ),
-          child: Column(
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(icon, size: 28, color: Color(0xFF915BEE)),
-              SizedBox(height: 4),
+              Icon(icon, size: 24, color: color),
               Text(
-                label,
+                trend,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 10,
+                  color: Colors.green,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey[700],
                 ),
               ),
             ],
           ),
-        ),
+          SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductionCard(String orderId, String garment, String status, int progress) {
+    return Container(
+      width: 200,
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                orderId,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _getProductionColor(status).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: _getProductionColor(status),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Text(
+            garment,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: progress / 100,
+            backgroundColor: Colors.grey[200],
+            color: _getProductionColor(status),
+            minHeight: 4,
+          ),
+          SizedBox(height: 4),
+          Text(
+            '$progress% complete',
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -341,8 +707,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     switch (status?.toLowerCase()) {
       case 'pending':
         return Colors.orange;
-      case 'shipped':
+      case 'cutting':
+        return Colors.purple;
+      case 'sewing':
         return Colors.blue;
+      case 'finishing':
+        return Colors.teal;
       case 'delivered':
         return Colors.green;
       default:
@@ -354,12 +724,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
     switch (status?.toLowerCase()) {
       case 'pending':
         return Icons.schedule;
-      case 'shipped':
-        return Icons.local_shipping;
+      case 'cutting':
+        return Icons.content_cut;
+      case 'sewing':
+        return Icons.smart_button;
+      case 'finishing':
+        return Icons.iron;
       case 'delivered':
         return Icons.check_circle;
       default:
         return Icons.info;
     }
+  }
+
+  Color _getProductionColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'cutting':
+        return Colors.purple;
+      case 'sewing':
+        return Colors.blue;
+      case 'finishing':
+        return Colors.teal;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Color _getDeadlineColor(int? daysLeft) {
+    if (daysLeft == null) return Colors.grey;
+    if (daysLeft <= 2) return Colors.red;
+    if (daysLeft <= 5) return Colors.orange;
+    return Colors.green;
   }
 }

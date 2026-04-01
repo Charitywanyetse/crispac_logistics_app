@@ -1,7 +1,7 @@
 // lib/providers/dashboard_provider.dart
 
 import 'package:flutter/material.dart';
-// import '../services/dashboard_service.dart'; // Temporarily disabled
+// import 'package:crispac_logistics_app/services/dashboard_service.dart';
 
 class DashboardProvider with ChangeNotifier {
   // final DashboardService _dashboardService = DashboardService(); // Not used for dummy data
