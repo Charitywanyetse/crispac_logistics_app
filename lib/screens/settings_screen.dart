@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/services.dart'; // for clipboard, haptics
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -10,1418 +9,792 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  // ---------- State variables ----------
-  bool _isLoading = true;
-  Map<String, dynamic> _userProfile = {};
+  // ===== STATE VARIABLES =====
+  bool _isLoading = false;
+  
+  // Wage Meter settings
+  Map<String, dynamic> _wageMeter = {
+    'hourlyRate': 25.00,
+    'currency': 'USD',
+    'overtimeRate': 1.5,
+  };
+  
+  // Product Decision settings
+  Map<String, dynamic> _productDecision = {
+    'autoApprove': false,
+    'minStockLevel': 10,
+    'reorderQuantity': 50,
+  };
+  
+  // Business Branding
+  Map<String, dynamic> _businessBranding = {
+    'companyName': 'Crispac Logistics',
+    'tagline': 'Excellence in Motion',
+    'primaryColor': '#6B48FF',
+  };
+  
+  // User Experience settings
+  Map<String, dynamic> _userExperience = {
+    'animationsEnabled': true,
+    'gestureNavigation': true,
+    'hapticFeedback': true,
+  };
+  
+  // Website settings
+  Map<String, dynamic> _websiteSettings = {
+    'autoSync': true,
+    'cacheEnabled': true,
+    'offlineMode': false,
+  };
+  
+  // Wage Meter template URLs
+  String _editWageUrl = 'https://example.com/edit-wage';
+  String _wageMeterTemplateUrl = 'https://example.com/wage-template';
 
-  // Notifications preferences (defaults)
-  bool _pushNotifications = true;
-  bool _emailNotifications = true;
-  bool _smsNotifications = false;
-  bool _deliveryUpdates = true;
-  bool _promotions = false;
-
-  // App preferences
-  bool _darkMode = false;
-  String _language = 'English';
-  bool _autoPlay = true;
-
-  // Privacy
-  bool _shareLocation = true;
-  bool _showOnlineStatus = true;
-
-  // ---------- Lifecycle ----------
   @override
   void initState() {
     super.initState();
-    _fetchUserProfile();
-    _loadSettingsFromStorage();
+    _loadSettings();
   }
 
-  // ---------- API & Storage ----------
-  Future<void> _fetchUserProfile() async {
+  Future<void> _loadSettings() async {
     setState(() => _isLoading = true);
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-      if (token == null) throw Exception('Not authenticated');
-
-      // Replace with your actual API endpoint
-      final response = await http.get(
-        Uri.parse('http://localhost:8000/api/user/profile'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          _userProfile = data['data'] ?? data;
-        });
-      } else {
-        _showSnackBar('Failed to load profile');
-      }
+      // Load all settings from shared preferences
+      setState(() {
+        _wageMeter['hourlyRate'] = prefs.getDouble('hourlyRate') ?? 25.00;
+        _wageMeter['currency'] = prefs.getString('currency') ?? 'USD';
+        _productDecision['autoApprove'] = prefs.getBool('autoApprove') ?? false;
+        _businessBranding['companyName'] = prefs.getString('companyName') ?? 'Crispac Logistics';
+        _userExperience['animationsEnabled'] = prefs.getBool('animationsEnabled') ?? true;
+        _websiteSettings['autoSync'] = prefs.getBool('autoSync') ?? true;
+      });
     } catch (e) {
-      _showSnackBar('Network error: $e');
+      _showSnackBar('Error loading settings: $e');
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _updateProfile(Map<String, dynamic> updatedData) async {
-    setState(() => _isLoading = true);
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-      if (token == null) throw Exception('Not authenticated');
-
-      final response = await http.put(
-        Uri.parse('http://localhost:8000/api/user/profile'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode(updatedData),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          _userProfile = data['data'] ?? data;
-        });
-        _showSnackBar('Profile updated');
-      } else {
-        _showSnackBar('Failed to update profile');
-      }
-    } catch (e) {
-      _showSnackBar('Network error: $e');
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _loadSettingsFromStorage() async {
+  Future<void> _saveSetting(String key, dynamic value) async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _pushNotifications = prefs.getBool('pushNotifications') ?? true;
-      _emailNotifications = prefs.getBool('emailNotifications') ?? true;
-      _smsNotifications = prefs.getBool('smsNotifications') ?? false;
-      _deliveryUpdates = prefs.getBool('deliveryUpdates') ?? true;
-      _promotions = prefs.getBool('promotions') ?? false;
-      _darkMode = prefs.getBool('darkMode') ?? false;
-      _language = prefs.getString('language') ?? 'English';
-      _autoPlay = prefs.getBool('autoPlay') ?? true;
-      _shareLocation = prefs.getBool('shareLocation') ?? true;
-      _showOnlineStatus = prefs.getBool('showOnlineStatus') ?? true;
-    });
+    await prefs.set(key, value);
   }
 
-  void _saveSetting(String key, dynamic value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, value);
-    // Optionally sync with backend
-  }
-
-  // ---------- UI Helpers ----------
-  void _showSnackBar(String message) {
+  void _showSnackBar(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red.shade700),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 
-  Future<void> _showEditDialog(String field, String currentValue) async {
-    final controller = TextEditingController(text: currentValue);
-    final result = await showDialog<String>(
+  void _showEditDialog(String title, String currentValue, Function(String) onSave) {
+    TextEditingController controller = TextEditingController(text: currentValue);
+    
+    showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Edit $field'),
+      builder: (context) => AlertDialog(
+        title: Text(title),
         content: TextField(
           controller: controller,
-          decoration: InputDecoration(labelText: field),
+          decoration: InputDecoration(
+            hintText: 'Enter new value',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text('Cancel'),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, controller.text),
+          ElevatedButton(
+            onPressed: () {
+              if (controller.text.isNotEmpty) {
+                onSave(controller.text);
+                Navigator.pop(context);
+                _showSnackBar('$title updated');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF915BEE),
+            ),
             child: Text('Save'),
           ),
         ],
       ),
     );
-    if (result != null && result != currentValue) {
-      _updateProfile({field.toLowerCase(): result});
-    }
   }
 
-  void _showChangePasswordDialog() {
-    final currentController = TextEditingController();
-    final newController = TextEditingController();
-    final confirmController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Change Password'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: currentController,
-              obscureText: true,
-              decoration: InputDecoration(labelText: 'Current Password'),
-            ),
-            TextField(
-              controller: newController,
-              obscureText: true,
-              decoration: InputDecoration(labelText: 'New Password'),
-            ),
-            TextField(
-              controller: confirmController,
-              obscureText: true,
-              decoration: InputDecoration(labelText: 'Confirm New Password'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              if (newController.text != confirmController.text) {
-                _showSnackBar('Passwords do not match');
-                return;
-              }
-              await _changePassword(currentController.text, newController.text);
-              Navigator.pop(context);
-            },
-            child: Text('Update'),
-          ),
-        ],
-      ),
-    );
+  void _openUrl(String url) {
+    // TODO: Implement URL launcher
+    _showSnackBar('Opening: $url');
   }
 
-  Future<void> _changePassword(String current, String newPassword) async {
-    setState(() => _isLoading = true);
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-      if (token == null) throw Exception('Not authenticated');
-
-      final response = await http.post(
-        Uri.parse('http://localhost:8000/api/user/change-password'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'current_password': current,
-          'new_password': newPassword,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        _showSnackBar('Password changed successfully');
-      } else {
-        _showSnackBar('Failed to change password');
-      }
-    } catch (e) {
-      _showSnackBar('Network error: $e');
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _deleteAccount() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Delete Account'),
-        content: Text('Are you sure? This action is permanent.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-    if (confirm != true) return;
-
-    setState(() => _isLoading = true);
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-      if (token == null) throw Exception('Not authenticated');
-
-      final response = await http.delete(
-        Uri.parse('http://localhost:8000/api/user/delete'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-
-      if (response.statusCode == 200) {
-        // Clear local data and navigate to login
-        await prefs.clear();
-        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-      } else {
-        _showSnackBar('Failed to delete account');
-      }
-    } catch (e) {
-      _showSnackBar('Network error: $e');
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  // ---------- UI ----------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Settings'),
-        backgroundColor: Color(0xFF915BEE),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: _fetchUserProfile,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF6B48FF),
+              Color(0xFF915BEE),
+              Color(0xFFB27AFF),
+            ],
           ),
-        ],
-      ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: EdgeInsets.symmetric(vertical: 8),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Personal Information Section
-                _buildSectionHeader('Personal Information'),
-                _buildProfileTile(
-                  icon: Icons.person,
-                  title: 'Name',
-                  value: _userProfile['name'] ?? 'Not set',
-                  onTap: () => _showEditDialog('Name', _userProfile['name'] ?? ''),
-                ),
-                _buildProfileTile(
-                  icon: Icons.email,
-                  title: 'Email',
-                  value: _userProfile['email'] ?? 'Not set',
-                  onTap: () => _showEditDialog('Email', _userProfile['email'] ?? ''),
-                ),
-                _buildProfileTile(
-                  icon: Icons.phone,
-                  title: 'Phone',
-                  value: _userProfile['phone'] ?? 'Not set',
-                  onTap: () => _showEditDialog('Phone', _userProfile['phone'] ?? ''),
-                ),
-                _buildProfileTile(
-                  icon: Icons.location_on,
-                  title: 'Address',
-                  value: _userProfile['address'] ?? 'Not set',
-                  onTap: () => _showEditDialog('Address', _userProfile['address'] ?? ''),
-                ),
-                Divider(height: 24, thickness: 1),
-
-                // Account Security
-                _buildSectionHeader('Account Security'),
-                ListTile(
-                  leading: Icon(Icons.lock_outline, color: Colors.grey[700]),
-                  title: Text('Change Password'),
-                  subtitle: Text('Update your password'),
-                  trailing: Icon(Icons.chevron_right),
-                  onTap: _showChangePasswordDialog,
-                ),
-                ListTile(
-                  leading: Icon(Icons.security, color: Colors.grey[700]),
-                  title: Text('Two-Factor Authentication'),
-                  subtitle: Text('Enhanced account security'),
-                  trailing: Switch(
-                    value: false, // will be fetched from backend
-                    onChanged: (v) {
-                      // TODO: implement 2FA toggle
-                    },
+                // Header
+                Container(
+                  padding: EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Back Button
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
+                      ),
+                      SizedBox(height: 16),
+                      
+                      // Title
+                      Text(
+                        'Design',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Customize your experience',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Divider(height: 24, thickness: 1),
 
-                // Notifications
-                _buildSectionHeader('Notifications'),
-                _buildSwitchTile(
-                  icon: Icons.notifications_active,
-                  title: 'Push Notifications',
-                  subtitle: 'Receive push notifications',
-                  value: _pushNotifications,
-                  onChanged: (v) {
-                    setState(() => _pushNotifications = v);
-                    _saveSetting('pushNotifications', v);
-                  },
-                ),
-                _buildSwitchTile(
-                  icon: Icons.email_outlined,
-                  title: 'Email Notifications',
-                  subtitle: 'Receive email updates',
-                  value: _emailNotifications,
-                  onChanged: (v) {
-                    setState(() => _emailNotifications = v);
-                    _saveSetting('emailNotifications', v);
-                  },
-                ),
-                _buildSwitchTile(
-                  icon: Icons.sms,
-                  title: 'SMS Notifications',
-                  subtitle: 'Receive text messages',
-                  value: _smsNotifications,
-                  onChanged: (v) {
-                    setState(() => _smsNotifications = v);
-                    _saveSetting('smsNotifications', v);
-                  },
-                ),
-                _buildSwitchTile(
-                  icon: Icons.local_shipping,
-                  title: 'Delivery Updates',
-                  subtitle: 'Get notifications about delivery status',
-                  value: _deliveryUpdates,
-                  onChanged: (v) {
-                    setState(() => _deliveryUpdates = v);
-                    _saveSetting('deliveryUpdates', v);
-                  },
-                ),
-                _buildSwitchTile(
-                  icon: Icons.local_offer,
-                  title: 'Promotions & Offers',
-                  subtitle: 'Receive special offers',
-                  value: _promotions,
-                  onChanged: (v) {
-                    setState(() => _promotions = v);
-                    _saveSetting('promotions', v);
-                  },
-                ),
-                Divider(height: 24, thickness: 1),
+                // Settings Content
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Wage Meter Section
+                        _buildSectionHeader(
+                          title: "components",
+                          subtitle: "Wage Meter",
+                          icon: Icons.speed_outlined,
+                        ),
+                        _buildSettingsCard(
+                          icon: Icons.attach_money,
+                          title: "Hourly Rate",
+                          value: "${_wageMeter['currency']} ${_wageMeter['hourlyRate']}/hr",
+                          onEdit: () => _showEditDialog(
+                            'Edit Hourly Rate',
+                            _wageMeter['hourlyRate'].toString(),
+                            (value) {
+                              setState(() {
+                                _wageMeter['hourlyRate'] = double.parse(value);
+                                _saveSetting('hourlyRate', double.parse(value));
+                              });
+                            },
+                          ),
+                          onDelete: () {
+                            setState(() {
+                              _wageMeter['hourlyRate'] = 0;
+                              _saveSetting('hourlyRate', 0);
+                            });
+                            _showSnackBar('Hourly rate reset');
+                          },
+                        ),
+                        _buildSettingsCard(
+                          icon: Icons.currency_exchange,
+                          title: "Currency",
+                          value: _wageMeter['currency'],
+                          onEdit: () => _showEditDialog(
+                            'Edit Currency',
+                            _wageMeter['currency'],
+                            (value) {
+                              setState(() {
+                                _wageMeter['currency'] = value;
+                                _saveSetting('currency', value);
+                              });
+                            },
+                          ),
+                          onDelete: () {
+                            setState(() {
+                              _wageMeter['currency'] = 'USD';
+                              _saveSetting('currency', 'USD');
+                            });
+                            _showSnackBar('Currency reset to USD');
+                          },
+                        ),
+                        _buildSettingsCard(
+                          icon: Icons.timer,
+                          title: "Overtime Rate",
+                          value: "${_wageMeter['overtimeRate']}x",
+                          onEdit: () => _showEditDialog(
+                            'Edit Overtime Rate',
+                            _wageMeter['overtimeRate'].toString(),
+                            (value) {
+                              setState(() {
+                                _wageMeter['overtimeRate'] = double.parse(value);
+                              });
+                            },
+                          ),
+                          onDelete: () {
+                            setState(() {
+                              _wageMeter['overtimeRate'] = 1.5;
+                            });
+                            _showSnackBar('Overtime rate reset');
+                          },
+                        ),
 
-                // App Preferences
-                _buildSectionHeader('App Preferences'),
-                _buildSwitchTile(
-                  icon: Icons.dark_mode,
-                  title: 'Dark Mode',
-                  subtitle: 'Switch to dark theme',
-                  value: _darkMode,
-                  onChanged: (v) {
-                    setState(() => _darkMode = v);
-                    _saveSetting('darkMode', v);
-                    // TODO: implement theme change
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.language, color: Colors.grey[700]),
-                  title: Text('Language'),
-                  subtitle: Text(_language),
-                  trailing: DropdownButton<String>(
-                    value: _language,
-                    underline: SizedBox(),
-                    items: ['English', 'French', 'Spanish']
-                        .map((lang) => DropdownMenuItem(value: lang, child: Text(lang)))
-                        .toList(),
-                    onChanged: (lang) {
-                      setState(() => _language = lang!);
-                      _saveSetting('language', lang);
-                    },
+                        SizedBox(height: 32),
+
+                        // Product Decision Section
+                        _buildSectionHeader(
+                          title: "decisions",
+                          subtitle: "Product Decision",
+                          icon: Icons.analytics_outlined,
+                        ),
+                        _buildSwitchCard(
+                          icon: Icons.auto_awesome,
+                          title: "Auto Approve Orders",
+                          value: _productDecision['autoApprove'],
+                          onChanged: (value) {
+                            setState(() {
+                              _productDecision['autoApprove'] = value;
+                              _saveSetting('autoApprove', value);
+                            });
+                          },
+                          onDelete: () {
+                            setState(() {
+                              _productDecision['autoApprove'] = false;
+                              _saveSetting('autoApprove', false);
+                            });
+                            _showSnackBar('Auto approve disabled');
+                          },
+                        ),
+                        _buildSettingsCard(
+                          icon: Icons.inventory,
+                          title: "Minimum Stock Level",
+                          value: "${_productDecision['minStockLevel']} units",
+                          onEdit: () => _showEditDialog(
+                            'Edit Minimum Stock',
+                            _productDecision['minStockLevel'].toString(),
+                            (value) {
+                              setState(() {
+                                _productDecision['minStockLevel'] = int.parse(value);
+                              });
+                            },
+                          ),
+                          onDelete: () {
+                            setState(() {
+                              _productDecision['minStockLevel'] = 10;
+                            });
+                            _showSnackBar('Stock level reset to 10');
+                          },
+                        ),
+                        _buildSettingsCard(
+                          icon: Icons.shopping_cart,
+                          title: "Reorder Quantity",
+                          value: "${_productDecision['reorderQuantity']} units",
+                          onEdit: () => _showEditDialog(
+                            'Edit Reorder Quantity',
+                            _productDecision['reorderQuantity'].toString(),
+                            (value) {
+                              setState(() {
+                                _productDecision['reorderQuantity'] = int.parse(value);
+                              });
+                            },
+                          ),
+                          onDelete: () {
+                            setState(() {
+                              _productDecision['reorderQuantity'] = 50;
+                            });
+                            _showSnackBar('Reorder quantity reset');
+                          },
+                        ),
+
+                        SizedBox(height: 32),
+
+                        // Business Branding Section
+                        _buildSectionHeader(
+                          title: "business",
+                          subtitle: "Branding",
+                          icon: Icons.business_outlined,
+                        ),
+                        _buildSettingsCard(
+                          icon: Icons.business,
+                          title: "Company Name",
+                          value: _businessBranding['companyName'],
+                          onEdit: () => _showEditDialog(
+                            'Edit Company Name',
+                            _businessBranding['companyName'],
+                            (value) {
+                              setState(() {
+                                _businessBranding['companyName'] = value;
+                                _saveSetting('companyName', value);
+                              });
+                            },
+                          ),
+                          onDelete: () {
+                            setState(() {
+                              _businessBranding['companyName'] = 'Crispac Logistics';
+                              _saveSetting('companyName', 'Crispac Logistics');
+                            });
+                            _showSnackBar('Company name reset');
+                          },
+                        ),
+                        _buildSettingsCard(
+                          icon: Icons.tag,
+                          title: "Tagline",
+                          value: _businessBranding['tagline'],
+                          onEdit: () => _showEditDialog(
+                            'Edit Tagline',
+                            _businessBranding['tagline'],
+                            (value) {
+                              setState(() {
+                                _businessBranding['tagline'] = value;
+                              });
+                            },
+                          ),
+                          onDelete: () {
+                            setState(() {
+                              _businessBranding['tagline'] = 'Excellence in Motion';
+                            });
+                            _showSnackBar('Tagline reset');
+                          },
+                        ),
+                        _buildColorPickerCard(
+                          icon: Icons.color_lens,
+                          title: "Primary Color",
+                          color: Color(int.parse(_businessBranding['primaryColor'].replaceFirst('#', '0xFF'))),
+                          onEdit: () {
+                            // TODO: Implement color picker
+                            _showSnackBar('Color picker coming soon');
+                          },
+                          onDelete: () {
+                            setState(() {
+                              _businessBranding['primaryColor'] = '#6B48FF';
+                            });
+                            _showSnackBar('Color reset to default');
+                          },
+                        ),
+
+                        SizedBox(height: 32),
+
+                        // User Experience Section
+                        _buildSectionHeader(
+                          title: "user experience",
+                          subtitle: "Wage Meter",
+                          icon: Icons.people_outline,
+                        ),
+                        _buildSwitchCard(
+                          icon: Icons.animation,
+                          title: "Animations",
+                          value: _userExperience['animationsEnabled'],
+                          onChanged: (value) {
+                            setState(() {
+                              _userExperience['animationsEnabled'] = value;
+                              _saveSetting('animationsEnabled', value);
+                            });
+                          },
+                          onDelete: () {
+                            setState(() {
+                              _userExperience['animationsEnabled'] = true;
+                              _saveSetting('animationsEnabled', true);
+                            });
+                            _showSnackBar('Animations enabled');
+                          },
+                        ),
+                        _buildSwitchCard(
+                          icon: Icons.swipe,
+                          title: "Gesture Navigation",
+                          value: _userExperience['gestureNavigation'],
+                          onChanged: (value) {
+                            setState(() {
+                              _userExperience['gestureNavigation'] = value;
+                            });
+                          },
+                          onDelete: () {
+                            setState(() {
+                              _userExperience['gestureNavigation'] = true;
+                            });
+                            _showSnackBar('Gesture navigation enabled');
+                          },
+                        ),
+                        _buildSwitchCard(
+                          icon: Icons.tactile,
+                          title: "Haptic Feedback",
+                          value: _userExperience['hapticFeedback'],
+                          onChanged: (value) {
+                            setState(() {
+                              _userExperience['hapticFeedback'] = value;
+                            });
+                          },
+                          onDelete: () {
+                            setState(() {
+                              _userExperience['hapticFeedback'] = true;
+                            });
+                            _showSnackBar('Haptic feedback enabled');
+                          },
+                        ),
+
+                        SizedBox(height: 32),
+
+                        // Website Section
+                        _buildSectionHeader(
+                          title: "website",
+                          subtitle: "Web Client",
+                          icon: Icons.web_outlined,
+                        ),
+                        _buildSwitchCard(
+                          icon: Icons.sync,
+                          title: "Auto Sync",
+                          value: _websiteSettings['autoSync'],
+                          onChanged: (value) {
+                            setState(() {
+                              _websiteSettings['autoSync'] = value;
+                              _saveSetting('autoSync', value);
+                            });
+                          },
+                          onDelete: () {
+                            setState(() {
+                              _websiteSettings['autoSync'] = true;
+                              _saveSetting('autoSync', true);
+                            });
+                            _showSnackBar('Auto sync enabled');
+                          },
+                        ),
+                        _buildSwitchCard(
+                          icon: Icons.storage,
+                          title: "Cache Data",
+                          value: _websiteSettings['cacheEnabled'],
+                          onChanged: (value) {
+                            setState(() {
+                              _websiteSettings['cacheEnabled'] = value;
+                            });
+                          },
+                          onDelete: () {
+                            setState(() {
+                              _websiteSettings['cacheEnabled'] = true;
+                            });
+                            _showSnackBar('Cache enabled');
+                          },
+                        ),
+                        _buildSwitchCard(
+                          icon: Icons.offline_bolt,
+                          title: "Offline Mode",
+                          value: _websiteSettings['offlineMode'],
+                          onChanged: (value) {
+                            setState(() {
+                              _websiteSettings['offlineMode'] = value;
+                            });
+                          },
+                          onDelete: () {
+                            setState(() {
+                              _websiteSettings['offlineMode'] = false;
+                            });
+                            _showSnackBar('Offline mode disabled');
+                          },
+                        ),
+
+                        SizedBox(height: 32),
+
+                        // External Links
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF8F9FF),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Resources',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              SizedBox(height: 12),
+                              _buildLinkTile(
+                                icon: Icons.edit,
+                                title: 'Edit wage',
+                                url: _editWageUrl,
+                              ),
+                              Divider(height: 1),
+                              _buildLinkTile(
+                                icon: Icons.insert_chart,
+                                title: 'Wage meter template',
+                                url: _wageMeterTemplateUrl,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 20),
+                      ],
+                    ),
                   ),
                 ),
-                _buildSwitchTile(
-                  icon: Icons.play_circle_outline,
-                  title: 'Auto-play Videos',
-                  subtitle: 'Automatically play videos',
-                  value: _autoPlay,
-                  onChanged: (v) {
-                    setState(() => _autoPlay = v);
-                    _saveSetting('autoPlay', v);
-                  },
-                ),
-                Divider(height: 24, thickness: 1),
-
-                // Privacy
-                _buildSectionHeader('Privacy'),
-                _buildSwitchTile(
-                  icon: Icons.location_on,
-                  title: 'Share Location',
-                  subtitle: 'Allow location access',
-                  value: _shareLocation,
-                  onChanged: (v) {
-                    setState(() => _shareLocation = v);
-                    _saveSetting('shareLocation', v);
-                  },
-                ),
-                _buildSwitchTile(
-                  icon: Icons.visibility,
-                  title: 'Show Online Status',
-                  subtitle: 'Let others see when you\'re online',
-                  value: _showOnlineStatus,
-                  onChanged: (v) {
-                    setState(() => _showOnlineStatus = v);
-                    _saveSetting('showOnlineStatus', v);
-                  },
-                ),
-                Divider(height: 24, thickness: 1),
-
-                // About
-                _buildSectionHeader('About'),
-                _buildInfoTile('App Version', '1.0.0'),
-                _buildInfoTile('Last Updated', 'March 1, 2026'),
-                ListTile(
-                  leading: Icon(Icons.privacy_tip, color: Colors.grey[700]),
-                  title: Text('Privacy Policy'),
-                  trailing: Icon(Icons.open_in_new),
-                  onTap: () {
-                    // open URL
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.description, color: Colors.grey[700]),
-                  title: Text('Terms of Service'),
-                  trailing: Icon(Icons.open_in_new),
-                  onTap: () {
-                    // open URL
-                  },
-                ),
-                Divider(height: 24, thickness: 1),
-
-                // Danger Zone
-                _buildSectionHeader('Danger Zone', color: Colors.red),
-                ListTile(
-                  leading: Icon(Icons.delete_forever, color: Colors.red),
-                  title: Text('Delete Account', style: TextStyle(color: Colors.red)),
-                  subtitle: Text('Permanently delete your account and data'),
-                  trailing: Icon(Icons.chevron_right, color: Colors.red),
-                  onTap: _deleteAccount,
-                ),
-                SizedBox(height: 40),
               ],
             ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title, {Color color = Colors.black87}) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: color,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildProfileTile({
+  Widget _buildSectionHeader({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Color(0xFF915BEE).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Color(0xFF915BEE), size: 24),
+          ),
+          SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsCard({
     required IconData icon,
     required String title,
     required String value,
-    required VoidCallback onTap,
+    required VoidCallback onEdit,
+    required VoidCallback onDelete,
   }) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.grey[700]),
-      title: Text(title),
-      subtitle: Text(value.isNotEmpty ? value : 'Not set'),
-      trailing: Icon(Icons.edit),
-      onTap: onTap,
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Color(0xFFF8F9FF),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Color(0xFF915BEE), size: 24),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.edit, size: 20, color: Colors.grey[600]),
+            onPressed: onEdit,
+          ),
+          IconButton(
+            icon: Icon(Icons.delete_outline, size: 20, color: Colors.red[400]),
+            onPressed: onDelete,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildSwitchTile({
+  Widget _buildSwitchCard({
     required IconData icon,
     required String title,
-    required String subtitle,
     required bool value,
     required ValueChanged<bool> onChanged,
+    required VoidCallback onDelete,
   }) {
-    return SwitchListTile(
-      secondary: Icon(icon, color: Colors.grey[700]),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      value: value,
-      onChanged: onChanged,
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Color(0xFFF8F9FF),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Color(0xFF915BEE), size: 24),
+          SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: Color(0xFF915BEE),
+          ),
+          IconButton(
+            icon: Icon(Icons.delete_outline, size: 20, color: Colors.red[400]),
+            onPressed: onDelete,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildInfoTile(String title, String value) {
+  Widget _buildColorPickerCard({
+    required IconData icon,
+    required String title,
+    required Color color,
+    required VoidCallback onEdit,
+    required VoidCallback onDelete,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Color(0xFFF8F9FF),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Color(0xFF915BEE), size: 24),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                SizedBox(height: 4),
+                Container(
+                  width: 40,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.edit, size: 20, color: Colors.grey[600]),
+            onPressed: onEdit,
+          ),
+          IconButton(
+            icon: Icon(Icons.delete_outline, size: 20, color: Colors.red[400]),
+            onPressed: onDelete,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLinkTile({
+    required IconData icon,
+    required String title,
+    required String url,
+  }) {
     return ListTile(
-      leading: Icon(Icons.info_outline, color: Colors.grey[700]),
-      title: Text(title),
-      trailing: Text(value, style: TextStyle(color: Colors.grey[600])),
+      leading: Icon(icon, color: Color(0xFF915BEE)),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      trailing: Icon(Icons.open_in_new, size: 18, color: Colors.grey[400]),
+      onTap: () => _openUrl(url),
+      dense: true,
     );
   }
 }
-
-
-
-// import 'package:flutter/material.dart';
-
-// class SettingsScreen extends StatefulWidget {
-//   @override
-//   _SettingsScreenState createState() => _SettingsScreenState();
-// }
-
-// class _SettingsScreenState extends State<SettingsScreen> {
-//   // ===== USER DATA =====
-//   String _userName = 'wanyetse charity';
-//   String _userEmail = 'wanyetse.charity@email.com';
-//   String _userPhone = '+256 (555) 123-4567';
-//   String _userAddress = 'uganda,kampala, bukoto';
-  
-//   // ===== NOTIFICATION SETTINGS =====
-//   bool _pushNotifications = true;
-//   bool _emailNotifications = true;
-//   bool _smsNotifications = false;
-//   bool _deliveryUpdates = true;
-//   bool _promoNotifications = false;
-  
-//   // ===== APP PREFERENCES =====
-//   bool _darkMode = false;
-//   String _selectedLanguage = 'English';
-//   bool _autoPlay = true;
-//   bool _saveData = false;
-  
-//   // ===== PRIVACY SETTINGS =====
-//   bool _shareLocation = true;
-//   bool _showOnlineStatus = true;
-//   bool _twoFactorAuth = false;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Colors.grey[50],
-//       appBar: AppBar(
-//         title: Text(
-//           'Settings',
-//           style: TextStyle(
-//             fontWeight: FontWeight.w600,
-//             fontSize: 22,
-//           ),
-//         ),
-//         backgroundColor: Color.fromARGB(255, 169, 143, 247), // Your purple color
-//         foregroundColor: Colors.white,
-//         elevation: 0,
-//         centerTitle: true,
-//         actions: [
-//           IconButton(
-//             icon: Icon(Icons.save),
-//             onPressed: () => _saveAllSettings(context),
-//           ),
-//         ],
-//       ),
-//       body: ListView(
-//         children: [
-//           // ===== PROFILE SECTION (EDITABLE) =====
-//           Container(
-//             margin: EdgeInsets.all(16),
-//             decoration: BoxDecoration(
-//               gradient: LinearGradient(
-//                 colors: [Color(0xFF9B7BFF), Color(0xFF7B5BFF)],
-//                 begin: Alignment.topLeft,
-//                 end: Alignment.bottomRight,
-//               ),
-//               borderRadius: BorderRadius.circular(20),
-//               boxShadow: [
-//                 BoxShadow(
-//                   color: Color(0xFF9B7BFF).withOpacity(0.3),
-//                   blurRadius: 10,
-//                   offset: Offset(0, 5),
-//                 ),
-//               ],
-//             ),
-//             child: Padding(
-//               padding: EdgeInsets.all(20),
-//               child: Column(
-//                 children: [
-//                   // Profile Image (click to change)
-//                   Stack(
-//                     children: [
-//                       CircleAvatar(
-//                         radius: 50,
-//                         backgroundColor: Colors.white,
-//                         child: Text(
-//                           _userName[0].toUpperCase(),
-//                           style: TextStyle(
-//                             fontSize: 40,
-//                             fontWeight: FontWeight.bold,
-//                             color: Color(0xFF9B7BFF),
-//                           ),
-//                         ),
-//                       ),
-//                       Positioned(
-//                         bottom: 0,
-//                         right: 0,
-//                         child: GestureDetector(
-//                           onTap: () => _showImageOptions(context),
-//                           child: Container(
-//                             padding: EdgeInsets.all(8),
-//                             decoration: BoxDecoration(
-//                               color: Colors.white,
-//                               shape: BoxShape.circle,
-//                             ),
-//                             child: Icon(
-//                               Icons.camera_alt,
-//                               size: 20,
-//                               color: Color(0xFF9B7BFF),
-//                             ),
-//                           ),
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                   SizedBox(height: 16),
-                  
-//                   // Editable Name
-//                   _buildEditableField(
-//                     icon: Icons.person,
-//                     value: _userName,
-//                     label: 'Name',
-//                     onTap: () => _showEditDialog(
-//                       'Edit Name',
-//                       _userName,
-//                       (newValue) => setState(() => _userName = newValue),
-//                     ),
-//                   ),
-//                   SizedBox(height: 8),
-                  
-//                   // Editable Email
-//                   _buildEditableField(
-//                     icon: Icons.email,
-//                     value: _userEmail,
-//                     label: 'Email',
-//                     onTap: () => _showEditDialog(
-//                       'Edit Email',
-//                       _userEmail,
-//                       (newValue) => setState(() => _userEmail = newValue),
-//                     ),
-//                   ),
-//                   SizedBox(height: 8),
-                  
-//                   // Editable Phone
-//                   _buildEditableField(
-//                     icon: Icons.phone,
-//                     value: _userPhone,
-//                     label: 'Phone',
-//                     onTap: () => _showEditDialog(
-//                       'Edit Phone',
-//                       _userPhone,
-//                       (newValue) => setState(() => _userPhone = newValue),
-//                     ),
-//                   ),
-//                   SizedBox(height: 8),
-                  
-//                   // Editable Address
-//                   _buildEditableField(
-//                     icon: Icons.location_on,
-//                     value: _userAddress,
-//                     label: 'Address',
-//                     onTap: () => _showEditDialog(
-//                       'Edit Address',
-//                       _userAddress,
-//                       (newValue) => setState(() => _userAddress = newValue),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-
-//           // ===== ACCOUNT SECURITY =====
-//           _buildSectionTitle('Account Security'),
-          
-//           _buildSettingsItem(
-//             icon: Icons.lock_outline,
-//             title: 'Change Password',
-//             subtitle: 'Update your password',
-//             onTap: () => _showChangePasswordDialog(context),
-//           ),
-          
-//           _buildSwitchItem(
-//             icon: Icons.fingerprint,
-//             title: 'Two-Factor Authentication',
-//             subtitle: 'Enhanced account security',
-//             value: _twoFactorAuth,
-//             onChanged: (value) => setState(() => _twoFactorAuth = value),
-//           ),
-
-//           // ===== NOTIFICATION PREFERENCES =====
-//           _buildSectionTitle('Notifications'),
-          
-//           _buildSwitchItem(
-//             icon: Icons.notifications_outlined,
-//             title: 'Push Notifications',
-//             subtitle: 'Receive push notifications',
-//             value: _pushNotifications,
-//             onChanged: (value) => setState(() => _pushNotifications = value),
-//           ),
-          
-//           _buildSwitchItem(
-//             icon: Icons.email_outlined,
-//             title: 'Email Notifications',
-//             subtitle: 'Receive email updates',
-//             value: _emailNotifications,
-//             onChanged: (value) => setState(() => _emailNotifications = value),
-//             enabled: _pushNotifications,
-//           ),
-          
-//           _buildSwitchItem(
-//             icon: Icons.sms_outlined,
-//             title: 'SMS Notifications',
-//             subtitle: 'Receive text messages',
-//             value: _smsNotifications,
-//             onChanged: (value) => setState(() => _smsNotifications = value),
-//             enabled: _pushNotifications,
-//           ),
-          
-//           _buildSwitchItem(
-//             icon: Icons.delivery_dining,
-//             title: 'Delivery Updates',
-//             subtitle: 'Get notified about delivery status',
-//             value: _deliveryUpdates,
-//             onChanged: (value) => setState(() => _deliveryUpdates = value),
-//           ),
-          
-//           _buildSwitchItem(
-//             icon: Icons.local_offer,
-//             title: 'Promotions & Offers',
-//             subtitle: 'Receive special offers',
-//             value: _promoNotifications,
-//             onChanged: (value) => setState(() => _promoNotifications = value),
-//           ),
-
-//           // ===== APP PREFERENCES =====
-//           _buildSectionTitle('App Preferences'),
-          
-//           _buildSwitchItem(
-//             icon: Icons.dark_mode,
-//             title: 'Dark Mode',
-//             subtitle: 'Switch to dark theme',
-//             value: _darkMode,
-//             onChanged: (value) => setState(() => _darkMode = value),
-//           ),
-          
-//           _buildSettingsItem(
-//             icon: Icons.language,
-//             title: 'Language',
-//             subtitle: _selectedLanguage,
-//             onTap: () => _showLanguageDialog(context),
-//           ),
-          
-//           _buildSwitchItem(
-//             icon: Icons.play_circle_outline,
-//             title: 'Auto-play Videos',
-//             subtitle: 'Automatically play videos',
-//             value: _autoPlay,
-//             onChanged: (value) => setState(() => _autoPlay = value),
-//           ),
-          
-//           _buildSwitchItem(
-//             icon: Icons.data_usage,
-//             title: 'Data Saver',
-//             subtitle: 'Reduce data usage',
-//             value: _saveData,
-//             onChanged: (value) => setState(() => _saveData = value),
-//           ),
-
-//           // ===== PRIVACY =====
-//           _buildSectionTitle('Privacy'),
-          
-//           _buildSwitchItem(
-//             icon: Icons.location_on,
-//             title: 'Share Location',
-//             subtitle: 'Allow location access',
-//             value: _shareLocation,
-//             onChanged: (value) => setState(() => _shareLocation = value),
-//           ),
-          
-//           _buildSwitchItem(
-//             icon: Icons.visibility,
-//             title: 'Show Online Status',
-//             subtitle: 'Let others see when you\'re online',
-//             value: _showOnlineStatus,
-//             onChanged: (value) => setState(() => _showOnlineStatus = value),
-//           ),
-
-//           // ===== ABOUT =====
-//           _buildSectionTitle('About'),
-          
-//           _buildAboutItem(
-//             icon: Icons.info_outline,
-//             title: 'App Version',
-//             value: '1.0.0',
-//           ),
-          
-//           _buildAboutItem(
-//             icon: Icons.update,
-//             title: 'Last Updated',
-//             value: 'March 4, 2026',
-//           ),
-          
-//           _buildSettingsItem(
-//             icon: Icons.privacy_tip_outlined,
-//             title: 'Privacy Policy',
-//             subtitle: 'Read our privacy policy',
-//             onTap: () => _showPrivacyPolicy(context),
-//           ),
-          
-//           _buildSettingsItem(
-//             icon: Icons.description_outlined,
-//             title: 'Terms of Service',
-//             subtitle: 'Read our terms',
-//             onTap: () => _showTermsOfService(context),
-//           ),
-
-//           // ===== DANGER ZONE =====
-//           _buildSectionTitle('Danger Zone', isDanger: true),
-          
-//           Container(
-//             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-//             decoration: BoxDecoration(
-//               border: Border.all(color: Colors.red.shade200),
-//               borderRadius: BorderRadius.circular(12),
-//             ),
-//             child: Column(
-//               children: [
-//                 ListTile(
-//                   leading: Icon(Icons.delete_outline, color: Colors.red),
-//                   title: Text('Delete Account', style: TextStyle(color: Colors.red)),
-//                   subtitle: Text('Permanently delete your account and data'),
-//                   onTap: () => _showDeleteAccountDialog(context),
-//                 ),
-//               ],
-//             ),
-//           ),
-
-//           // ===== LOGOUT BUTTON =====
-//           Container(
-//             margin: EdgeInsets.all(16),
-//             child: ElevatedButton(
-//               onPressed: () => _showLogoutDialog(context),
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor: Colors.white,
-//                 foregroundColor: Color(0xFF9B7BFF),
-//                 elevation: 0,
-//                 padding: EdgeInsets.symmetric(vertical: 16),
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(12),
-//                   side: BorderSide(color: Color(0xFF9B7BFF).withOpacity(0.3)),
-//                 ),
-//               ),
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 children: [
-//                   Icon(Icons.logout, color: Color(0xFF9B7BFF)),
-//                   SizedBox(width: 8),
-//                   Text(
-//                     'Log Out',
-//                     style: TextStyle(
-//                       fontSize: 16,
-//                       fontWeight: FontWeight.w600,
-//                       color: Color(0xFF9B7BFF),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-          
-//           SizedBox(height: 20),
-//         ],
-//       ),
-//     );
-//   }
-
-//   // ===== HELPER WIDGETS =====
-
-//   Widget _buildEditableField({
-//     required IconData icon,
-//     required String value,
-//     required String label,
-//     required VoidCallback onTap,
-//   }) {
-//     return GestureDetector(
-//       onTap: onTap,
-//       child: Container(
-//         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-//         decoration: BoxDecoration(
-//           color: Colors.white.withOpacity(0.2),
-//           borderRadius: BorderRadius.circular(8),
-//         ),
-//         child: Row(
-//           children: [
-//             Icon(icon, color: Colors.white, size: 18),
-//             SizedBox(width: 12),
-//             Expanded(
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Text(
-//                     label,
-//                     style: TextStyle(
-//                       fontSize: 10,
-//                       color: Colors.white.withOpacity(0.7),
-//                     ),
-//                   ),
-//                   Text(
-//                     value,
-//                     style: TextStyle(
-//                       fontSize: 14,
-//                       color: Colors.white,
-//                       fontWeight: FontWeight.w500,
-//                     ),
-//                     maxLines: 1,
-//                     overflow: TextOverflow.ellipsis,
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             Icon(Icons.edit, color: Colors.white, size: 16),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildSectionTitle(String title, {bool isDanger = false}) {
-//     return Padding(
-//       padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
-//       child: Text(
-//         title,
-//         style: TextStyle(
-//           fontSize: 14,
-//           fontWeight: FontWeight.bold,
-//           color: isDanger ? Colors.red : Color(0xFF9B7BFF),
-//           letterSpacing: 0.5,
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildSettingsItem({
-//     required IconData icon,
-//     required String title,
-//     String? subtitle,
-//     required VoidCallback onTap,
-//     bool showArrow = true,
-//     Color? color,
-//   }) {
-//     return ListTile(
-//       leading: Container(
-//         padding: EdgeInsets.all(8),
-//         decoration: BoxDecoration(
-//           color: (color ?? Color(0xFF9B7BFF)).withOpacity(0.1),
-//           borderRadius: BorderRadius.circular(8),
-//         ),
-//         child: Icon(icon, color: color ?? Color(0xFF9B7BFF), size: 22),
-//       ),
-//       title: Text(title, style: TextStyle(fontWeight: FontWeight.w500)),
-//       subtitle: subtitle != null 
-//         ? Text(subtitle, style: TextStyle(fontSize: 13, color: Colors.grey[600]))
-//         : null,
-//       trailing: showArrow 
-//         ? Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400])
-//         : null,
-//       onTap: onTap,
-//     );
-//   }
-
-//   Widget _buildSwitchItem({
-//     required IconData icon,
-//     required String title,
-//     String? subtitle,
-//     required bool value,
-//     required Function(bool) onChanged,
-//     bool enabled = true,
-//   }) {
-//     return SwitchListTile(
-//       secondary: Container(
-//         padding: EdgeInsets.all(8),
-//         decoration: BoxDecoration(
-//           color: (enabled ? Color(0xFF9B7BFF) : Colors.grey).withOpacity(0.1),
-//           borderRadius: BorderRadius.circular(8),
-//         ),
-//         child: Icon(
-//           icon, 
-//           color: enabled ? Color(0xFF9B7BFF) : Colors.grey,
-//           size: 22,
-//         ),
-//       ),
-//       title: Text(
-//         title,
-//         style: TextStyle(
-//           fontWeight: FontWeight.w500,
-//           color: enabled ? Colors.black : Colors.grey,
-//         ),
-//       ),
-//       subtitle: subtitle != null 
-//         ? Text(
-//             subtitle,
-//             style: TextStyle(
-//               fontSize: 13,
-//               color: enabled ? Colors.grey[600] : Colors.grey[400],
-//             ),
-//           )
-//         : null,
-//       value: value,
-//       onChanged: enabled ? onChanged : null,
-//       activeColor: Color(0xFF9B7BFF),
-//     );
-//   }
-
-//   Widget _buildAboutItem({
-//     required IconData icon,
-//     required String title,
-//     required String value,
-//   }) {
-//     return ListTile(
-//       leading: Container(
-//         padding: EdgeInsets.all(8),
-//         decoration: BoxDecoration(
-//           color: Colors.grey.shade100,
-//           borderRadius: BorderRadius.circular(8),
-//         ),
-//         child: Icon(icon, color: Colors.grey.shade700, size: 22),
-//       ),
-//       title: Text(title, style: TextStyle(fontWeight: FontWeight.w500)),
-//       trailing: Text(
-//         value,
-//         style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-//       ),
-//     );
-//   }
-
-//   // ===== DIALOGS =====
-
-//   void _showEditDialog(String title, String currentValue, Function(String) onSave) {
-//     TextEditingController controller = TextEditingController(text: currentValue);
-    
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: Text(title),
-//           content: TextField(
-//             controller: controller,
-//             decoration: InputDecoration(
-//               hintText: 'Enter new value',
-//               border: OutlineInputBorder(
-//                 borderRadius: BorderRadius.circular(8),
-//               ),
-//             ),
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () => Navigator.pop(context),
-//               child: Text('Cancel'),
-//             ),
-//             ElevatedButton(
-//               onPressed: () {
-//                 if (controller.text.isNotEmpty) {
-//                   onSave(controller.text);
-//                   Navigator.pop(context);
-//                   _showSnackBar(context, '$title updated successfully');
-//                 }
-//               },
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor: Color(0xFF9B7BFF),
-//               ),
-//               child: Text('Save'),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-
-//   void _showChangePasswordDialog(BuildContext context) {
-//     TextEditingController oldPass = TextEditingController();
-//     TextEditingController newPass = TextEditingController();
-//     TextEditingController confirmPass = TextEditingController();
-    
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: Text('Change Password'),
-//           content: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               TextField(
-//                 controller: oldPass,
-//                 obscureText: true,
-//                 decoration: InputDecoration(
-//                   labelText: 'Current Password',
-//                   border: OutlineInputBorder(
-//                     borderRadius: BorderRadius.circular(8),
-//                   ),
-//                 ),
-//               ),
-//               SizedBox(height: 12),
-//               TextField(
-//                 controller: newPass,
-//                 obscureText: true,
-//                 decoration: InputDecoration(
-//                   labelText: 'New Password',
-//                   border: OutlineInputBorder(
-//                     borderRadius: BorderRadius.circular(8),
-//                   ),
-//                 ),
-//               ),
-//               SizedBox(height: 12),
-//               TextField(
-//                 controller: confirmPass,
-//                 obscureText: true,
-//                 decoration: InputDecoration(
-//                   labelText: 'Confirm Password',
-//                   border: OutlineInputBorder(
-//                     borderRadius: BorderRadius.circular(8),
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () => Navigator.pop(context),
-//               child: Text('Cancel'),
-//             ),
-//             ElevatedButton(
-//               onPressed: () {
-//                 if (newPass.text == confirmPass.text) {
-//                   Navigator.pop(context);
-//                   _showSnackBar(context, 'Password changed successfully');
-//                 } else {
-//                   _showSnackBar(context, 'Passwords do not match', isError: true);
-//                 }
-//               },
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor: Color(0xFF9B7BFF),
-//               ),
-//               child: Text('Update'),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-
-//   void _showLanguageDialog(BuildContext context) {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: Text('Select Language'),
-//           content: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               _buildLanguageOption('English', _selectedLanguage == 'English'),
-//               _buildLanguageOption('Spanish', _selectedLanguage == 'Spanish'),
-//               _buildLanguageOption('French', _selectedLanguage == 'French'),
-//               _buildLanguageOption('German', _selectedLanguage == 'German'),
-//               _buildLanguageOption('Chinese', _selectedLanguage == 'Chinese'),
-//             ],
-//           ),
-//         );
-//       },
-//     );
-//   }
-
-//   Widget _buildLanguageOption(String language, bool isSelected) {
-//     return ListTile(
-//       title: Text(language),
-//       leading: isSelected 
-//         ? Icon(Icons.check_circle, color: Color(0xFF9B7BFF))
-//         : Icon(Icons.radio_button_unchecked, color: Colors.grey),
-//       onTap: () {
-//         setState(() => _selectedLanguage = language);
-//         Navigator.pop(context);
-//         _showSnackBar(context, 'Language changed to $language');
-//       },
-//     );
-//   }
-
-//   void _showImageOptions(BuildContext context) {
-//     showModalBottomSheet(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return SafeArea(
-//           child: Wrap(
-//             children: [
-//               ListTile(
-//                 leading: Icon(Icons.photo_library, color: Color(0xFF9B7BFF)),
-//                 title: Text('Choose from Gallery'),
-//                 onTap: () {
-//                   Navigator.pop(context);
-//                   _showSnackBar(context, 'Gallery opened');
-//                 },
-//               ),
-//               ListTile(
-//                 leading: Icon(Icons.photo_camera, color: Color(0xFF9B7BFF)),
-//                 title: Text('Take Photo'),
-//                 onTap: () {
-//                   Navigator.pop(context);
-//                   _showSnackBar(context, 'Camera opened');
-//                 },
-//               ),
-//               ListTile(
-//                 leading: Icon(Icons.delete, color: Colors.red),
-//                 title: Text('Remove Photo'),
-//                 onTap: () {
-//                   Navigator.pop(context);
-//                   _showSnackBar(context, 'Photo removed');
-//                 },
-//               ),
-//             ],
-//           ),
-//         );
-//       },
-//     );
-//   }
-
-//   void _showPrivacyPolicy(BuildContext context) {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: Text('Privacy Policy'),
-//           content: Container(
-//             width: double.maxFinite,
-//             child: Text(
-//               'Your privacy is important to us. This privacy policy explains how we collect, use, and protect your personal information when you use our app.\n\n'
-//               '1. Information We Collect\n'
-//               '2. How We Use Your Information\n'
-//               '3. Data Security\n'
-//               '4. Your Rights\n'
-//               '5. Contact Us',
-//               style: TextStyle(height: 1.5),
-//             ),
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () => Navigator.pop(context),
-//               child: Text('Close'),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-
-//   void _showTermsOfService(BuildContext context) {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: Text('Terms of Service'),
-//           content: Container(
-//             width: double.maxFinite,
-//             child: Text(
-//               'By using this app, you agree to these terms. Please read them carefully.\n\n'
-//               '1. Acceptance of Terms\n'
-//               '2. User Responsibilities\n'
-//               '3. Account Termination\n'
-//               '4. Limitation of Liability\n'
-//               '5. Changes to Terms',
-//               style: TextStyle(height: 1.5),
-//             ),
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () => Navigator.pop(context),
-//               child: Text('Close'),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-
-//   void _showDeleteAccountDialog(BuildContext context) {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: Text('Delete Account', style: TextStyle(color: Colors.red)),
-//           content: Text(
-//             'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost.',
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () => Navigator.pop(context),
-//               child: Text('Cancel'),
-//             ),
-//             ElevatedButton(
-//               onPressed: () {
-//                 Navigator.pop(context);
-//                 _showSnackBar(context, 'Account deleted', isError: true);
-//               },
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor: Colors.red,
-//               ),
-//               child: Text('Delete Permanently'),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-
-//   void _showLogoutDialog(BuildContext context) {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: Text('Log Out'),
-//           content: Text('Are you sure you want to log out?'),
-//           actions: [
-//             TextButton(
-//               onPressed: () => Navigator.pop(context),
-//               child: Text('Cancel'),
-//             ),
-//             ElevatedButton(
-//               onPressed: () {
-//                 Navigator.pop(context);
-//                 _performLogout(context);
-//               },
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor: Colors.red,
-//               ),
-//               child: Text('Log Out'),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-
-//   void _saveAllSettings(BuildContext context) {
-//     // Here you would save all settings to backend/shared preferences
-//     _showSnackBar(context, 'All settings saved successfully');
-//   }
-
-//   void _performLogout(BuildContext context) {
-//     _showSnackBar(context, 'Logged out successfully');
-//     // Navigate to login screen (you'll implement this)
-//   }
-
-//   void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       SnackBar(
-//         content: Text(message),
-//         backgroundColor: isError ? Colors.red : Color(0xFF9B7BFF),
-//         behavior: SnackBarBehavior.floating,
-//         shape: RoundedRectangleBorder(
-//           borderRadius: BorderRadius.circular(10),
-//         ),
-//       ),
-//     );
-//   }
-// }

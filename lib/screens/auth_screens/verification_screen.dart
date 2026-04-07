@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../auth screens/reset_password_screen.dart';
+import 'reset_password_screen.dart';
 import 'dart:async';
 
 class VerificationScreen extends StatefulWidget {
