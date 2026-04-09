@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'auth_screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,39 +9,53 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final PageController _pageController = PageController();
+  final PageController _pageController = PageController(viewportFraction: 0.88);
   int _currentPage = 0;
+  Timer? _timer;
 
-  // Onboarding data matching the exact style from images
   final List<Map<String, dynamic>> _onboardingData = [
     {
-      'title': 'CRISPAC',
-      'subtitle': 'Hotel & Restaurant',
+      'image': 'assets/School Uniform.png',
+      'title': 'Hotel & Restaurant',
       'description': 'Professional uniforms for chefs',
-      'fullDescription': 'Professional uniforms for chefs and service staff.',
-      'icon': Icons.restaurant,
-      'step': '01',
     },
     {
-      'title': 'CRISPAC',
-      'subtitle': 'Medical Professionals',
+      'image': 'assets/Hospital Gown.png',
+      'title': 'Medical Professionals',
       'description': 'Clean and professional uniforms',
-      'fullDescription': 'Clean and professional uniforms for hospitals and clinics.',
-      'icon': Icons.medical_services,
-      'step': '02',
     },
     {
-      'title': 'CRISPAC',
-      'subtitle': 'Corporate & Business',
+      'image': 'assets/Construction Wear.png',
+      'title': 'Corporate & Business',
       'description': 'Elegant professional attire',
-      'fullDescription': 'Sophisticated uniforms for corporate environments and business settings.',
-      'icon': Icons.business_center,
-      'step': '03',
     },
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _startAutoSlide();
+  }
+
+  void _startAutoSlide() {
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) {
+      if (_currentPage < _onboardingData.length - 1) {
+        _currentPage++;
+      } else {
+        _currentPage = 0;
+      }
+
+      _pageController.animateToPage(
+        _currentPage,
+        duration: Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
   void dispose() {
+    _timer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -48,301 +63,254 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_seen_onboarding', true);
-    
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => LoginScreen()),
-      );
-    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => LoginScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(0.2, 0.3),
-            radius: 1.2,
-            colors: [
-              Color(0xFF101215),
-              Color(0xFF08090C),
-              Color(0xFF030405),
-            ],
-            stops: [0.0, 0.6, 1.0],
-          ),
-        ),
-        child: Stack(
+      backgroundColor: Color(0xFFF3EEF9),
+      body: SafeArea(
+        child: Column(
           children: [
-            // Subtle noise texture overlay
-            IgnorePointer(
-              child: Opacity(
-                opacity: 0.05,
-                child: Image.network(
-                  'https://www.transparenttextures.com/patterns/black-scales.png',
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(),
-                ),
-              ),
-            ),
-            
-            // Ambient glow effect
-            Positioned(
-              top: MediaQuery.of(context).size.height * 0.3,
-              left: MediaQuery.of(context).size.width * 0.5 - 150,
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      Color(0xFF506EA0).withOpacity(0.12),
-                      Color(0xFF14192D).withOpacity(0.0),
-                    ],
-                    stops: [0.0, 0.7],
-                  ),
-                ),
-              ),
-            ),
-            
-            SafeArea(
-              child: Column(
+            // TOP BAR
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Skip Button - Top Right Corner
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    child: Align(
-                      alignment: Alignment.topRight,
-                      child: TextButton(
-                        onPressed: _completeOnboarding,
-                        child: Text(
-                          'Skip',
-                          style: TextStyle(
-                            color: Color(0xFFA3B3D6),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
+                  Text(
+                    "CRISPAC",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
                     ),
                   ),
-                  
-                  // Page View
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      onPageChanged: (index) {
-                        setState(() {
-                          _currentPage = index;
-                        });
-                      },
-                      itemCount: _onboardingData.length,
-                      itemBuilder: (context, index) {
-                        return _buildOnboardingPage(index);
-                      },
-                    ),
-                  ),
-                  
-                  // Bottom Section
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-                    child: Column(
-                      children: [
-                        // Step indicator (STEP XX / XX)
-                        Text(
-                          'STEP ${_onboardingData[_currentPage]['step'].toString().padLeft(2, '0')} / ${_onboardingData.length.toString().padLeft(2, '0')}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 2,
-                            color: Color(0xFF6C7A9E),
-                          ),
-                        ),
-                        SizedBox(height: 16),
-                        
-                        // Page Indicators
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(
-                            _onboardingData.length,
-                            (index) => AnimatedContainer(
-                              duration: Duration(milliseconds: 300),
-                              margin: EdgeInsets.symmetric(horizontal: 5),
-                              width: _currentPage == index ? 28 : 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(3),
-                                color: _currentPage == index
-                                    ? Colors.white
-                                    : Colors.white24,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 24),
-                        
-                        // Next Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (_currentPage == _onboardingData.length - 1) {
-                                _completeOnboarding();
-                              } else {
-                                _pageController.nextPage(
-                                  duration: Duration(milliseconds: 500),
-                                  curve: Curves.easeInOutCubic,
-                                );
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Color(0xFF1A1C23),
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Text(
-                              _currentPage == _onboardingData.length - 1
-                                  ? 'Get Started'
-                                  : 'Next',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  TextButton(
+                    onPressed: _completeOnboarding,
+                    child: Text("Skip", style: TextStyle(color: Colors.grey)),
+                  )
                 ],
               ),
             ),
+
+            // PAGES
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _onboardingData.length,
+                onPageChanged: (index) {
+                  setState(() => _currentPage = index);
+                },
+                itemBuilder: (context, index) {
+                  return _buildAnimatedPage(index);
+                },
+              ),
+            ),
+
+            // DOT INDICATOR
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                _onboardingData.length,
+                (index) => AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  margin: EdgeInsets.symmetric(horizontal: 5),
+                  width: _currentPage == index ? 20 : 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: _currentPage == index
+                        ? Color(0xFF8E2DE2)
+                        : Colors.grey[400],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: 20),
+
+            // MAIN BUTTON - WHITE TEXT
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_currentPage == 2) {
+                      _completeOnboarding();
+                    } else {
+                      _pageController.nextPage(
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF8E2DE2),
+                    foregroundColor: Colors.white, // WHITE TEXT
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Text(
+                    _currentPage == 2 ? "Get Started" : "Next",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white, // WHITE TEXT
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: 25),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildOnboardingPage(int index) {
+  // PREMIUM ANIMATED CARD
+  Widget _buildAnimatedPage(int index) {
     final data = _onboardingData[index];
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 500),
-      curve: Curves.easeInOutCubic,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Animated Icon Container - circular white background
-            TweenAnimationBuilder(
-              tween: Tween<double>(begin: 0.85, end: 1.0),
-              duration: Duration(milliseconds: 600),
-              curve: Curves.easeOutCubic,
-              child: Container(
-                width: 130,
-                height: 130,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 25,
-                      offset: Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  data['icon'],
-                  size: 65,
-                  color: Color(0xFF1A1C23),
-                ),
-              ),
-              builder: (context, value, child) {
-                return Transform.scale(
-                  scale: value,
-                  child: child,
-                );
-              },
-            ),
-            SizedBox(height: 48),
-            
-            // Title: CRISPAC (brand name with gradient)
-            ShaderMask(
-              shaderCallback: (bounds) => LinearGradient(
-                colors: [
-                  Colors.white,
-                  Color(0xFFE0E4F0),
-                  Color(0xFFB9C1D4),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ).createShader(bounds),
-              child: Text(
-                data['title'],
-                style: TextStyle(
-                  fontSize: 52,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            SizedBox(height: 12),
-            
-            // Subtitle (e.g., Hotel & Restaurant)
-            Text(
-              data['subtitle'],
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-                letterSpacing: -0.3,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 12),
-            
-            // Description line (first line - matches image exactly)
-            Text(
-              data['description'],
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFFC9D4ED),
-                height: 1.4,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            
-            // Full description (second line - extra detail)
-            if (data['fullDescription'] != data['description'])
-              Padding(
-                padding: EdgeInsets.only(top: 4),
-                child: Text(
-                  data['fullDescription'].replaceFirst(data['description'], '').trim(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF8A99B8),
-                    height: 1.4,
+
+    return AnimatedBuilder(
+      animation: _pageController,
+      builder: (context, child) {
+        double value = 1.0;
+
+        if (_pageController.position.haveDimensions) {
+          value = _pageController.page! - index;
+          value = (1 - (value.abs() * 0.2)).clamp(0.85, 1.0);
+        }
+
+        return Center(
+          child: Transform.scale(
+            scale: value,
+            child: _buildCard(data),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCard(Map data) {
+    return Container(
+      padding: EdgeInsets.all(20),
+      margin: EdgeInsets.symmetric(vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 20,
+            offset: Offset(0, 10),
+          )
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // IMAGE
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.asset(
+              data['image'],
+              height: 250,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                height: 250,
+                color: Color(0xFFF3EEF9),
+                child: Center(
+                  child: Icon(
+                    Icons.image_not_supported,
+                    size: 50,
+                    color: Colors.grey[400],
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ),
-          ],
-        ),
+            ),
+          ),
+
+          SizedBox(height: 20),
+
+          // PURPLE LINE
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Color(0xFF8E2DE2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+
+          SizedBox(height: 20),
+
+          // TITLE
+          Text(
+            data['title'],
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          SizedBox(height: 10),
+
+          // DESCRIPTION
+          Text(
+            data['description'],
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+            ),
+          ),
+
+          SizedBox(height: 20),
+
+          // INNER BUTTON - WHITE TEXT
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                if (_currentPage == 2) {
+                  _completeOnboarding();
+                } else {
+                  _pageController.nextPage(
+                    duration: Duration(milliseconds: 500),
+                    curve: Curves.easeInOut,
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF8E2DE2),
+                foregroundColor: Colors.white, // WHITE TEXT
+                padding: EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                "Next",
+                style: TextStyle(
+                  color: Colors.white, // WHITE TEXT
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

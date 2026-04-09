@@ -5,7 +5,7 @@ import 'dart:async';
 class VerificationScreen extends StatefulWidget {
   final String email;
 
-  const VerificationScreen({required this.email});
+  const VerificationScreen({Key? key, required this.email}) : super(key: key);
 
   @override
   _VerificationScreenState createState() => _VerificationScreenState();
@@ -17,7 +17,7 @@ class _VerificationScreenState extends State<VerificationScreen>
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
   bool _isLoading = false;
   bool _canResend = false;
-  int _secondsRemaining = 30;
+  int _secondsRemaining = 59;
   Timer? _timer;
   
   late AnimationController _controller;
@@ -46,7 +46,7 @@ class _VerificationScreenState extends State<VerificationScreen>
   void _startCountdown() {
     setState(() {
       _canResend = false;
-      _secondsRemaining = 30;
+      _secondsRemaining = 59;
     });
 
     _timer?.cancel();
@@ -97,7 +97,6 @@ class _VerificationScreenState extends State<VerificationScreen>
 
     setState(() => _isLoading = true);
 
-    // Simulate API verification
     Future.delayed(Duration(seconds: 2), () {
       setState(() => _isLoading = false);
       
@@ -109,16 +108,19 @@ class _VerificationScreenState extends State<VerificationScreen>
         ),
       );
 
+      // Navigate to Reset Password Screen with email
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => ResetPasswordScreen(),
+          builder: (_) => ResetPasswordScreen(email: widget.email),
         ),
       );
     });
   }
 
   void _resendCode() {
+    if (!_canResend) return;
+    
     _startCountdown();
     
     ScaffoldMessenger.of(context).showSnackBar(
@@ -146,7 +148,7 @@ class _VerificationScreenState extends State<VerificationScreen>
             end: Alignment.bottomRight,
             colors: [
               Color(0xFF6B48FF),
-              Color(0xFF915BEE),
+              Color(0xFF8E2DE2),
               Color(0xFFB27AFF),
             ],
           ),
@@ -155,41 +157,28 @@ class _VerificationScreenState extends State<VerificationScreen>
           child: SlideTransition(
             position: _slideAnimation,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Back to Login Button
+                  // Back Button with Circle Background
                   Align(
                     alignment: Alignment.topLeft,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.arrow_back, size: 20),
-                          SizedBox(width: 8),
-                          Text(
-                            'Back',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
                       ),
                     ),
                   ),
                   
-                  const SizedBox(height: 20),
+                  SizedBox(height: 30),
                   
-                  // Icon/Logo
+                  // Security Icon
                   Container(
                     padding: EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -198,68 +187,85 @@ class _VerificationScreenState extends State<VerificationScreen>
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black26,
-                          blurRadius: 20,
+                          blurRadius: 30,
                           offset: Offset(0, 10),
                         ),
                       ],
                     ),
                     child: Icon(
-                      Icons.security_outlined,
-                      size: 60,
-                      color: Color(0xFF915BEE),
+                      Icons.shield_outlined,
+                      size: 50,
+                      color: Color(0xFF8E2DE2),
                     ),
                   ),
                   
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   
-                  // Title
+                  // Security Title
                   Text(
                     'Security',
                     style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white70,
                       letterSpacing: 1,
                     ),
                   ),
                   
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   
-                  // Subtitle
+                  // Verify Account Title
                   Text(
                     'Verify Account',
                     style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      letterSpacing: 0.5,
                     ),
                   ),
                   
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   
                   // Description
+                  Text(
+                    'Enter the 6-digit verification code sent to your email address.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                      height: 1.4,
+                    ),
+                  ),
+                  
+                  SizedBox(height: 32),
+                  
+                  // Email display
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Text(
-                      'Enter the 6-digit verification code sent to\n${widget.email}',
-                      textAlign: TextAlign.center,
+                      widget.email,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white70,
-                        height: 1.4,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                   
-                  const SizedBox(height: 40),
+                  SizedBox(height: 32),
                   
-                  // OTP Input Fields
+                  // 6-Digit OTP Input Fields
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: List.generate(6, (index) {
                       return Container(
                         width: 50,
-                        height: 70,
+                        height: 60,
                         child: TextFormField(
                           controller: _otpControllers[index],
                           focusNode: _focusNodes[index],
@@ -269,7 +275,7 @@ class _VerificationScreenState extends State<VerificationScreen>
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF915BEE),
+                            color: Color(0xFF1A1C23),
                           ),
                           decoration: InputDecoration(
                             counterText: "",
@@ -285,9 +291,9 @@ class _VerificationScreenState extends State<VerificationScreen>
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Color(0xFF915BEE), width: 2),
+                              borderSide: BorderSide(color: Color(0xFF8E2DE2), width: 2),
                             ),
-                            contentPadding: EdgeInsets.symmetric(vertical: 20),
+                            contentPadding: EdgeInsets.symmetric(vertical: 15),
                           ),
                           onChanged: (value) {
                             if (value.length == 1 && index < 5) {
@@ -301,7 +307,7 @@ class _VerificationScreenState extends State<VerificationScreen>
                     }),
                   ),
                   
-                  const SizedBox(height: 40),
+                  SizedBox(height: 40),
                   
                   // Verify Button
                   _isLoading
@@ -314,110 +320,143 @@ class _VerificationScreenState extends State<VerificationScreen>
                             onPressed: _verifyOTP,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: Color(0xFF915BEE),
-                              minimumSize: const Size(double.infinity, 55),
+                              foregroundColor: Color(0xFF8E2DE2),
+                              minimumSize: const Size(double.infinity, 52),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              elevation: 2,
+                              elevation: 0,
                             ),
                             child: const Text(
-                              'Verify',
+                              'Verify Code',
                               style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
                         ),
                   
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   
-                  // Reset Code Link
-                  Center(
-                    child: TextButton(
-                      onPressed: _canResend ? _resendCode : null,
-                      child: Text(
-                        _canResend ? 'Reset Code' : 'Resend in $_secondsRemaining s',
-                        style: TextStyle(
-                          color: _canResend ? Colors.white : Colors.white60,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          decoration: _canResend ? TextDecoration.underline : null,
-                        ),
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Set Sending on Reset Link
-                  Center(
-                    child: TextButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Reset settings configured'),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      },
-                      child: Text(
-                        'Set Sending on Reset',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 13,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 30),
-                  
-                  // Check your info section
+                  // Resend Code Section
                   Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                      ),
-                    ),
+                    padding: EdgeInsets.symmetric(vertical: 16),
                     child: Column(
                       children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              size: 16,
+                        Text(
+                          'Resend Code',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: _canResend ? Colors.white : Colors.white54,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        if (!_canResend)
+                          Text(
+                            'Wait ${_secondsRemaining.toString().padLeft(2, '0')} to resend',
+                            style: TextStyle(
+                              fontSize: 12,
                               color: Colors.white70,
                             ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Check your info',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                          ),
+                        if (_canResend)
+                          TextButton(
+                            onPressed: _resendCode,
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            ),
+                            child: Text(
+                              'Tap to resend code',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.underline,
+                                color: Colors.white,
                               ),
                             ),
-                          ],
+                          ),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: 16),
+                  
+                  // Divider
+                  Container(
+                    height: 1,
+                    color: Colors.white.withOpacity(0.2),
+                    margin: EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  
+                  SizedBox(height: 20),
+                  
+                  // Check your Inbox Section
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.mark_email_read_outlined,
+                          size: 32,
+                          color: Colors.white70,
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'Charging your account was an error.',
+                          'Check your Inbox',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Check again if you don\'t see it in a minute.',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.white60,
+                            color: Colors.white70,
                           ),
                         ),
                       ],
                     ),
                   ),
+                  
+                  SizedBox(height: 20),
+                  
+                  // Back to Login Link
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Back to ",
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "Login",
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  SizedBox(height: 20),
                 ],
               ),
             ),

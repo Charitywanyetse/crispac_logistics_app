@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'screens/delivery_history_screen.dart';
-import 'screens/support_contact_screen.dart';
-import 'screens/settings_screen.dart';
+import 'settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -11,281 +9,248 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   // User information
-  String _userName = 'Account name testing';
-  String _userEmail = 'account@example.com';
-  String _addressLine1 = '123 Main Street';
-  String _addressLine2 = 'Apt 4B';
-  String _city = 'Kampala';
-  String _state = 'Central Region';
-  String _zipCode = '256001';
-  String _phoneNumber = '+256 700 123456';
+  String _firstName = 'Alexander';
+  String _lastName = 'Sterling';
+  String _fullName = 'Alexander Alexis Sterling';
+  String _role = 'Administrateur';
+  String _email = 'a.sterling@creepac.com';
+  String _phone = '+33 (0)1 803 - 9412';
+  String _clientStatus = 'Banking Client Status';
   
-  // Account settings
-  bool _emailNotifications = true;
-  bool _pushNotifications = true;
-  bool _twoFactorAuth = false;
+  // Addresses
+  String _primaryResidence = '01, rue du Père, 5, 01000 Paris';
+  String _regionalOffice = '100 boulevard Raspail, Rue S, 01000 PARIS';
   
-  // API Keys (mock data)
-  String _apiKey = 'pk_live_abc123xyz789';
-  String _clientId = 'client_12345';
-  String _clientSecret = 'secret_67890';
-  
-  // Stats
-  int _totalDeliveries = 24;
-  double _rating = 4.8;
-  int _onTimePercentage = 98;
+  // Notifications
+  bool _bilanActivites = false;
+  bool _dossierControle = false;
+  bool _ressourcesClients = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF6B48FF),
-              Color(0xFF915BEE),
-              Color(0xFFB27AFF),
-            ],
+      backgroundColor: Color(0xFFF8F9FF),
+      appBar: AppBar(
+        title: Text(
+          'Creepac Logisteres',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF8E2DE2),
           ),
         ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Container(
-                  padding: EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Back Button
-                      IconButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: Icon(Icons.arrow_back, color: Colors.white),
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
-                      ),
-                      SizedBox(height: 16),
-                      
-                      // Title
-                      Text(
-                        'Create updates',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Manage your account and preferences',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
-                  ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings_outlined, color: Color(0xFF8E2DE2)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SettingsScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Section with Name and Role
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF6B48FF),
+                    Color(0xFF915BEE),
+                    Color(0xFFB27AFF),
+                  ],
                 ),
-
-                // Profile Content
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
+                ),
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Avatar
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.person,
+                        size: 50,
+                        color: Color(0xFF8E2DE2),
+                      ),
                     ),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    SizedBox(height: 16),
+                    Text(
+                      'Alexander Sterling',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'President/Ingénieur de l\'IA',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '2017',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Row(
                       children: [
-                        // Stats Cards Row
-                        Row(
-                          children: [
-                            _buildStatCard('Deliveries', _totalDeliveries.toString(), Icons.local_shipping_outlined),
-                            SizedBox(width: 12),
-                            _buildStatCard('Rating', _rating.toString(), Icons.star_outline, suffix: ' ★'),
-                            SizedBox(width: 12),
-                            _buildStatCard('On Time', '$_onTimePercentage%', Icons.timer_outlined),
-                          ],
-                        ),
-                        SizedBox(height: 24),
-
-                        // Account Information Section
-                        _buildSectionTitle(Icons.account_circle_outlined, "Account Information"),
-                        SizedBox(height: 12),
-                        _buildInfoCard([
-                          _InfoItem("Account", _userName, Icons.person_outline),
-                          _InfoItem("API keys", _apiKey, Icons.vpn_key_outlined, isSensitive: true),
-                          _InfoItem("user-agent/agent users", "Mozilla/5.0...", Icons.devices_outlined),
-                          _InfoItem("request headers", "Authorization: Bearer...", Icons.http_outlined),
-                          _InfoItem("client_id", _clientId, Icons.badge_outlined),
-                          _InfoItem("client_secret", _clientSecret, Icons.lock_outlined, isSensitive: true),
-                        ]),
-
-                        SizedBox(height: 24),
-
-                        // Addresses Section
-                        _buildSectionTitle(Icons.location_on_outlined, "Addresses"),
-                        SizedBox(height: 12),
-                        _buildInfoCard([
-                          _InfoItem("Home address", "", Icons.home_outlined),
-                          _InfoItem("Address line 1", _addressLine1, Icons.add_location_outlined),
-                          _InfoItem("Address line 2", _addressLine2, Icons.add_location_outlined),
-                          _InfoItem("City", _city, Icons.location_city_outlined),
-                          _InfoItem("State", _state, Icons.map_outlined),
-                          _InfoItem("Zip code", _zipCode, Icons.markunread_mailbox_outlined),
-                        ]),
-
-                        SizedBox(height: 24),
-
-                        // Notifications Section
-                        _buildSectionTitle(Icons.notifications_outlined, "Notifications"),
-                        SizedBox(height: 12),
-                        _buildSettingsCard([
-                          _SettingsItem(
-                            "User login",
-                            Icons.login_outlined,
-                            Switch(
-                              value: _emailNotifications,
-                              onChanged: (value) {
-                                setState(() {
-                                  _emailNotifications = value;
-                                });
-                              },
-                              activeColor: Color(0xFF915BEE),
-                            ),
-                          ),
-                          _SettingsItem(
-                            "Email",
-                            Icons.email_outlined,
-                            Switch(
-                              value: _emailNotifications,
-                              onChanged: (value) {
-                                setState(() {
-                                  _emailNotifications = value;
-                                });
-                              },
-                              activeColor: Color(0xFF915BEE),
-                            ),
-                          ),
-                          _SettingsItem(
-                            "Password",
-                            Icons.lock_outlined,
-                            Switch(
-                              value: _pushNotifications,
-                              onChanged: (value) {
-                                setState(() {
-                                  _pushNotifications = value;
-                                });
-                              },
-                              activeColor: Color(0xFF915BEE),
-                            ),
-                          ),
-                        ]),
-
-                        SizedBox(height: 24),
-
-                        // Account Actions Section
-                        _buildSectionTitle(Icons.settings_applications_outlined, "Account Actions"),
-                        SizedBox(height: 12),
-                        _buildActionCard([
-                          _ActionItem(
-                            "Open account on app",
-                            Icons.open_in_browser_outlined,
-                            () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Opening account settings...'),
-                                  behavior: SnackBarBehavior.floating,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Votre Nom :',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white70,
                                 ),
-                              );
-                            },
-                          ),
-                          _ActionItem(
-                            "Security settings",
-                            Icons.security_outlined,
-                            () {
-                              _showSecurityDialog();
-                            },
-                          ),
-                        ]),
-
-                        SizedBox(height: 24),
-
-                        // Log Out Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _logout,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red.shade700,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
                               ),
-                            ),
-                            child: Text(
-                              'Log Out',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                              SizedBox(height: 4),
+                              Text(
+                                _lastName,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
-                        
-                        SizedBox(height: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Votre Prénom :',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                _firstName,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String label, String value, IconData icon, {String suffix = ''}) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: Color(0xFFF8F9FF),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.grey.shade200,
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 28, color: Color(0xFF915BEE)),
-            SizedBox(height: 8),
-            Text(
-              value + suffix,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
               ),
             ),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
+
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Account Information Section
+                  _buildSectionHeader('Account information'),
+                  SizedBox(height: 12),
+                  _buildInfoCard([
+                    _InfoItem('Nom :', _fullName),
+                    _InfoItem('Classe :', _role),
+                    _InfoItem('Adresse :', _email),
+                    _InfoItem('Tél :', _phone),
+                    _InfoItem('Numéro :', _clientStatus),
+                  ]),
+
+                  SizedBox(height: 24),
+
+                  // Addresses Section
+                  _buildSectionHeader('Addresses'),
+                  SizedBox(height: 12),
+                  _buildAddressCard(
+                    title: 'Primary Residence',
+                    address: _primaryResidence,
+                  ),
+                  SizedBox(height: 12),
+                  _buildAddressCard(
+                    title: 'Regional Office',
+                    address: _regionalOffice,
+                  ),
+
+                  SizedBox(height: 24),
+
+                  // Notifications Section
+                  _buildSectionHeader('Notifications'),
+                  SizedBox(height: 12),
+                  _buildNotificationCard([
+                    _NotificationItem(
+                      title: 'Bilan d\'activités',
+                      value: _bilanActivites,
+                      onChanged: (value) {
+                        setState(() {
+                          _bilanActivites = value ?? false;
+                        });
+                      },
+                    ),
+                    _NotificationItem(
+                      title: 'Dossier Contrôle',
+                      value: _dossierControle,
+                      onChanged: (value) {
+                        setState(() {
+                          _dossierControle = value ?? false;
+                        });
+                      },
+                    ),
+                    _NotificationItem(
+                      title: 'Ressources Clients',
+                      value: _ressourcesClients,
+                      onChanged: (value) {
+                        setState(() {
+                          _ressourcesClients = value ?? false;
+                        });
+                      },
+                    ),
+                  ]),
+
+                  SizedBox(height: 24),
+
+                  // Account Actions Section
+                  _buildSectionHeader('Account Actions'),
+                  SizedBox(height: 12),
+                  _buildAccountActionCard(),
+                ],
               ),
             ),
           ],
@@ -294,38 +259,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSectionTitle(IconData icon, String title) {
-    return Row(
-      children: [
-        Container(
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Color(0xFF915BEE).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: Color(0xFF915BEE), size: 20),
-        ),
-        SizedBox(width: 12),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-      ],
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+      ),
     );
   }
 
   Widget _buildInfoCard(List<_InfoItem> items) {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFFF8F9FF),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.shade200,
-        ),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: items.map((item) {
@@ -334,46 +291,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(item.icon, size: 20, color: Color(0xFF915BEE)),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.label,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        item.value.isEmpty ? 'Not set' : item.value,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: item.isSensitive ? Colors.grey[600] : Colors.black87,
-                          fontFamily: item.isSensitive ? 'monospace' : null,
-                        ),
-                      ),
-                    ],
+                SizedBox(
+                  width: 100,
+                  child: Text(
+                    item.label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[700],
+                    ),
                   ),
                 ),
-                if (!item.value.isEmpty)
-                  IconButton(
-                    icon: Icon(Icons.copy, size: 18, color: Colors.grey[400]),
-                    onPressed: () {
-                      // Copy to clipboard
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('${item.label} copied to clipboard'),
-                          duration: Duration(seconds: 1),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
+                Expanded(
+                  child: Text(
+                    item.value,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
                   ),
+                ),
               ],
             ),
           );
@@ -382,14 +319,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSettingsCard(List<_SettingsItem> items) {
+  Widget _buildAddressCard({
+    required String title,
+    required String address,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.location_on_outlined, color: Color(0xFF8E2DE2), size: 20),
+              SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Text(
+            address,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[600],
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationCard(List<_NotificationItem> items) {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFFF8F9FF),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.shade200,
-        ),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: items.map((item) {
@@ -397,18 +388,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                Icon(item.icon, size: 20, color: Color(0xFF915BEE)),
-                SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    item.label,
+                    item.title,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black87,
                     ),
                   ),
                 ),
-                item.control,
+                Checkbox(
+                  value: item.value,
+                  onChanged: item.onChanged,
+                  activeColor: Color(0xFF8E2DE2),
+                  side: BorderSide(color: Colors.grey[400]!),
+                ),
               ],
             ),
           );
@@ -417,94 +411,92 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildActionCard(List<_ActionItem> items) {
+  Widget _buildAccountActionCard() {
     return Container(
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Color(0xFFF8F9FF),
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFF8E2DE2).withOpacity(0.1),
+            Color(0xFF6B48FF).withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.grey.shade200,
+          color: Color(0xFF8E2DE2).withOpacity(0.2),
         ),
       ),
       child: Column(
-        children: items.map((item) {
-          return ListTile(
-            leading: Icon(item.icon, color: Color(0xFF915BEE)),
-            title: Text(
-              item.label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Sign up for your account or manage your banking profile here!',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[700],
+              height: 1.4,
+            ),
+          ),
+          SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Bonjour !',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF8E2DE2),
+                ),
               ),
-            ),
-            trailing: Icon(Icons.chevron_right, color: Colors.grey[400]),
-            onTap: item.onTap,
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  void _showSecurityDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Security Settings'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SwitchListTile(
-              title: Text('Two-Factor Authentication'),
-              subtitle: Text('Add an extra layer of security'),
-              value: _twoFactorAuth,
-              onChanged: (value) {
-                setState(() {
-                  _twoFactorAuth = value;
-                });
-                Navigator.pop(context);
-              },
-              activeColor: Color(0xFF915BEE),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+              ElevatedButton(
+                onPressed: () {
+                  _showSnackBar('Login feature coming soon');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF8E2DE2),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text('Login'),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 }
 
 class _InfoItem {
   final String label;
   final String value;
-  final IconData icon;
-  final bool isSensitive;
   
-  _InfoItem(this.label, this.value, this.icon, {this.isSensitive = false});
+  _InfoItem(this.label, this.value);
 }
 
-class _SettingsItem {
-  final String label;
-  final IconData icon;
-  final Widget control;
+class _NotificationItem {
+  final String title;
+  final bool value;
+  final ValueChanged<bool?> onChanged;
   
-  _SettingsItem(this.label, this.icon, this.control);
-}
-
-class _ActionItem {
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-  
-  _ActionItem(this.label, this.icon, this.onTap);
+  _NotificationItem({
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
 }

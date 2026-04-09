@@ -45,8 +45,16 @@ class MyApp extends StatelessWidget {
           );
         }
         if (settings.name == '/reset-password') {
+          // FIXED: Get email from arguments
+          final args = settings.arguments as String?;
+          if (args == null) {
+            // If no email provided, go back to login
+            return MaterialPageRoute(
+              builder: (context) => LoginScreen(),
+            );
+          }
           return MaterialPageRoute(
-            builder: (context) => ResetPasswordScreen(),
+            builder: (context) => ResetPasswordScreen(email: args),
           );
         }
         return null;
@@ -54,7 +62,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
 
 
 
