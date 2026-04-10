@@ -8,18 +8,18 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // User information
-  String _firstName = 'Alexander';
-  String _lastName = 'Sterling';
-  String _fullName = 'Alexander Alexis Sterling';
-  String _role = 'Administrateur';
-  String _email = 'a.sterling@creepac.com';
-  String _phone = '+33 (0)1 803 - 9412';
-  String _clientStatus = 'Banking Client Status';
+  // User information - Updated with your details
+  String _firstName = 'Charity';
+  String _lastName = 'Admin';
+  String _fullName = 'Charity Admin';
+  String _role = 'Administrator';
+  String _email = 'crispac2@gmail.com';
+  String _phone = '+256 (0) 123 456789';
+  String _clientStatus = 'Premium Client Status';
   
-  // Addresses
-  String _primaryResidence = '01, rue du Père, 5, 01000 Paris';
-  String _regionalOffice = '100 boulevard Raspail, Rue S, 01000 PARIS';
+  // Addresses - Updated with your location
+  String _primaryResidence = 'Bukoto, Kampala, Uganda';
+  String _regionalOffice = 'Bukoto Regional Office, Kampala, Uganda';
   
   // Notifications
   bool _bilanActivites = false;
@@ -32,7 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: Color(0xFFF8F9FF),
       appBar: AppBar(
         title: Text(
-          'Creepac Logisteres',
+          'CRISPAC Logistics',  // Changed from Creepac Logisteres
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Color(0xFF8E2DE2),
@@ -91,7 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Alexander Sterling',
+                      'Charity Admin',  // Changed to your name
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -100,7 +100,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'President/Ingénieur de l\'IA',
+                      'Administrator',  // Changed from French
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.white70,
@@ -114,7 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        '2017',
+                        'Member since 2024',  // Changed from '2017'
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.white,
@@ -130,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Votre Nom :',
+                                'Last Name :',  // Changed from French
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.white70,
@@ -153,7 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Votre Prénom :',
+                                'First Name :',  // Changed from French
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.white70,
@@ -184,14 +184,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Account Information Section
-                  _buildSectionHeader('Account information'),
+                  _buildSectionHeader('Account Information'),  // Changed to English
                   SizedBox(height: 12),
                   _buildInfoCard([
-                    _InfoItem('Nom :', _fullName),
-                    _InfoItem('Classe :', _role),
-                    _InfoItem('Adresse :', _email),
-                    _InfoItem('Tél :', _phone),
-                    _InfoItem('Numéro :', _clientStatus),
+                    _InfoItem('Full Name :', _fullName),  // Changed from French
+                    _InfoItem('Role :', _role),  // Changed from French
+                    _InfoItem('Email :', _email),  // Changed from French
+                    _InfoItem('Phone :', _phone),  // Changed from French
+                    _InfoItem('Status :', _clientStatus),  // Changed from French
                   ]),
 
                   SizedBox(height: 24),
@@ -216,7 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(height: 12),
                   _buildNotificationCard([
                     _NotificationItem(
-                      title: 'Bilan d\'activités',
+                      title: 'Activity Report',  // Changed from French
                       value: _bilanActivites,
                       onChanged: (value) {
                         setState(() {
@@ -225,7 +225,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                     _NotificationItem(
-                      title: 'Dossier Contrôle',
+                      title: 'Control Document',  // Changed from French
                       value: _dossierControle,
                       onChanged: (value) {
                         setState(() {
@@ -234,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                     _NotificationItem(
-                      title: 'Ressources Clients',
+                      title: 'Client Resources',  // Changed from French
                       value: _ressourcesClients,
                       onChanged: (value) {
                         setState(() {
@@ -444,7 +444,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Bonjour !',
+                'Welcome!',  // Changed from 'Bonjour !'
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

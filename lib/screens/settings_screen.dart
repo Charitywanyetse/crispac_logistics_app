@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -50,13 +51,429 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setString(key, value);
   }
 
-  void _showSnackBar(String message) {
+  void _showSnackBar(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.green,
+        backgroundColor: isError ? Colors.red : Colors.green,
         behavior: SnackBarBehavior.floating,
         duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // REAL FUNCTION: Change Email
+  void _changeEmail() {
+    TextEditingController emailController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Change Email'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Enter your new email address:'),
+            SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                hintText: 'newemail@example.com',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIcon: Icon(Icons.email_outlined),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (emailController.text.isNotEmpty && emailController.text.contains('@')) {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('user_email', emailController.text);
+                Navigator.pop(context);
+                _showSnackBar('Email updated to: ${emailController.text}');
+              } else {
+                _showSnackBar('Please enter a valid email', isError: true);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF8E2DE2),
+            ),
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // REAL FUNCTION: Change Password
+  void _changePassword() {
+    TextEditingController currentPassword = TextEditingController();
+    TextEditingController newPassword = TextEditingController();
+    TextEditingController confirmPassword = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Change Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: currentPassword,
+              decoration: InputDecoration(
+                hintText: 'Current Password',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIcon: Icon(Icons.lock_outline),
+              ),
+              obscureText: true,
+            ),
+            SizedBox(height: 12),
+            TextField(
+              controller: newPassword,
+              decoration: InputDecoration(
+                hintText: 'New Password',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIcon: Icon(Icons.lock_outline),
+              ),
+              obscureText: true,
+            ),
+            SizedBox(height: 12),
+            TextField(
+              controller: confirmPassword,
+              decoration: InputDecoration(
+                hintText: 'Confirm New Password',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIcon: Icon(Icons.lock_outline),
+              ),
+              obscureText: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (newPassword.text.length < 6) {
+                _showSnackBar('Password must be at least 6 characters', isError: true);
+                return;
+              }
+              if (newPassword.text != confirmPassword.text) {
+                _showSnackBar('Passwords do not match', isError: true);
+                return;
+              }
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('user_password', newPassword.text);
+              Navigator.pop(context);
+              _showSnackBar('Password changed successfully');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF8E2DE2),
+            ),
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // REAL FUNCTION: Manage Profile
+  void _manageProfile() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Manage Profile'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.person, color: Color(0xFF8E2DE2)),
+              title: Text('Edit Name'),
+              onTap: () {
+                Navigator.pop(context);
+                _editName();
+              },
+            ),
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.phone, color: Color(0xFF8E2DE2)),
+              title: Text('Edit Phone Number'),
+              onTap: () {
+                Navigator.pop(context);
+                _editPhone();
+              },
+            ),
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.location_on, color: Color(0xFF8E2DE2)),
+              title: Text('Edit Address'),
+              onTap: () {
+                Navigator.pop(context);
+                _editAddress();
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _editName() {
+    TextEditingController nameController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Name'),
+        content: TextField(
+          controller: nameController,
+          decoration: InputDecoration(
+            hintText: 'Enter your full name',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (nameController.text.isNotEmpty) {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('user_name', nameController.text);
+                Navigator.pop(context);
+                _showSnackBar('Name updated to: ${nameController.text}');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF8E2DE2),
+            ),
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _editPhone() {
+    TextEditingController phoneController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Phone Number'),
+        content: TextField(
+          controller: phoneController,
+          decoration: InputDecoration(
+            hintText: 'Enter your phone number',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            prefixIcon: Icon(Icons.phone),
+          ),
+          keyboardType: TextInputType.phone,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (phoneController.text.isNotEmpty) {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('user_phone', phoneController.text);
+                Navigator.pop(context);
+                _showSnackBar('Phone updated to: ${phoneController.text}');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF8E2DE2),
+            ),
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _editAddress() {
+    TextEditingController addressController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Address'),
+        content: TextField(
+          controller: addressController,
+          decoration: InputDecoration(
+            hintText: 'Enter your address',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            prefixIcon: Icon(Icons.location_on),
+          ),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (addressController.text.isNotEmpty) {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('user_address', addressController.text);
+                Navigator.pop(context);
+                _showSnackBar('Address updated to: ${addressController.text}');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF8E2DE2),
+            ),
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // REAL FUNCTION: Privacy Policy (Opens web page)
+  Future<void> _openPrivacyPolicy() async {
+    final Uri url = Uri.parse('https://www.crispac.com/privacy-policy');
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        _showSnackBar('Could not open privacy policy', isError: true);
+      }
+    } catch (e) {
+      _showSnackBar('Error opening link', isError: true);
+    }
+  }
+
+  // REAL FUNCTION: Terms of Service (Opens web page)
+  Future<void> _openTermsOfService() async {
+    final Uri url = Uri.parse('https://www.crispac.com/terms-of-service');
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        _showSnackBar('Could not open terms of service', isError: true);
+      }
+    } catch (e) {
+      _showSnackBar('Error opening link', isError: true);
+    }
+  }
+
+  // REAL FUNCTION: Help Center
+  Future<void> _openHelpCenter() async {
+    final Uri url = Uri.parse('https://www.crispac.com/help');
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        _showSnackBar('Could not open help center', isError: true);
+      }
+    } catch (e) {
+      _showSnackBar('Error opening link', isError: true);
+    }
+  }
+
+  // REAL FUNCTION: Contact Us
+  void _contactUs() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Contact Us'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.email, color: Color(0xFF8E2DE2)),
+              title: Text('crispac2@gmail.com'),
+              onTap: () {
+                final Uri emailUri = Uri(scheme: 'mailto', path: 'crispac2@gmail.com');
+                launchUrl(emailUri);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.phone, color: Color(0xFF8E2DE2)),
+              title: Text('+256 (0) 123 456789'),
+              onTap: () {
+                final Uri phoneUri = Uri(scheme: 'tel', path: '+256123456789');
+                launchUrl(phoneUri);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.location_on, color: Color(0xFF8E2DE2)),
+              title: Text('Bukoto, Kampala, Uganda'),
+              onTap: () {
+                final Uri mapsUri = Uri.parse('https://maps.google.com/?q=Bukoto+Kampala+Uganda');
+                launchUrl(mapsUri);
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // REAL FUNCTION: Clear Cache
+  void _clearCache() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Clear Cache'),
+        content: Text('Are you sure you want to clear all cached data?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              // Clear specific cached items
+              await prefs.remove('cached_data');
+              Navigator.pop(context);
+              _showSnackBar('Cache cleared successfully');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: Text('Clear'),
+          ),
+        ],
       ),
     );
   }
@@ -123,32 +540,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _clearCache() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Clear Cache'),
-        content: Text('Are you sure you want to clear all cached data?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _showSnackBar('Cache cleared successfully');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: Text('Clear'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,29 +567,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
             
             _buildProfileTile(
               title: 'Manage Profile',
-              subtitle: 'Upgrade to a new account',
+              subtitle: 'Edit your personal information',
               icon: Icons.person_outline,
-              onTap: () {
-                _showSnackBar('Navigate to Profile Management');
-              },
+              onTap: _manageProfile, // NOW CLICKABLE
             ),
             
             _buildProfileTile(
               title: 'Change Email',
-              subtitle: 'Edit, send or upgrade your email',
+              subtitle: 'Update your email address',
               icon: Icons.email_outlined,
-              onTap: () {
-                _showSnackBar('Navigate to Email Change');
-              },
+              onTap: _changeEmail, // NOW CLICKABLE
             ),
             
             _buildProfileTile(
               title: 'Change Password',
-              subtitle: 'Last changed 13 remaining days',
+              subtitle: 'Update your password',
               icon: Icons.lock_outline,
-              onTap: () {
-                _showSnackBar('Navigate to Password Change');
-              },
+              onTap: _changePassword, // NOW CLICKABLE
             ),
             
             SizedBox(height: 24),
@@ -214,6 +599,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 setState(() {
                   _pushNotification = value;
                   _saveSetting('push_notification', value);
+                  _showSnackBar(value ? 'Push notifications enabled' : 'Push notifications disabled');
                 });
               },
             ),
@@ -225,6 +611,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 setState(() {
                   _emailUpdates = value;
                   _saveSetting('email_updates', value);
+                  _showSnackBar(value ? 'Email updates enabled' : 'Email updates disabled');
                 });
               },
             ),
@@ -236,6 +623,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 setState(() {
                   _promotionalOffers = value;
                   _saveSetting('promotional_offers', value);
+                  _showSnackBar(value ? 'Promotional offers enabled' : 'Promotional offers disabled');
                 });
               },
             ),
@@ -253,6 +641,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 setState(() {
                   _biometricLogin = value;
                   _saveSetting('biometric_login', value);
+                  _showSnackBar(value ? 'Biometric login enabled' : 'Biometric login disabled');
                 });
               },
             ),
@@ -260,17 +649,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildNavTile(
               title: 'Privacy Policy',
               icon: Icons.privacy_tip_outlined,
-              onTap: () {
-                _showSnackBar('Open Privacy Policy');
-              },
+              onTap: _openPrivacyPolicy, // NOW CLICKABLE - Opens webpage
             ),
             
             _buildNavTile(
               title: 'Terms of Service',
               icon: Icons.description_outlined,
-              onTap: () {
-                _showSnackBar('Open Terms of Service');
-              },
+              onTap: _openTermsOfService, // NOW CLICKABLE - Opens webpage
             ),
             
             SizedBox(height: 24),
@@ -282,7 +667,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildLanguageTile(
               title: 'Language',
               value: _selectedLanguage,
-              onTap: _showLanguageDialog,
+              onTap: _showLanguageDialog, // NOW CLICKABLE
             ),
             
             _buildSwitchTile(
@@ -292,13 +677,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 setState(() {
                   _darkMode = value;
                   _saveSetting('dark_mode', value);
+                  _showSnackBar(value ? 'Dark mode enabled' : 'Light mode enabled');
                 });
               },
             ),
             
             _buildClearCacheTile(
               title: 'Clear Cache',
-              onClear: _clearCache,
+              onClear: _clearCache, // NOW CLICKABLE
             ),
             
             SizedBox(height: 24),
@@ -310,17 +696,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildNavTile(
               title: 'Help Center',
               icon: Icons.help_outline,
-              onTap: () {
-                _showSnackBar('Open Help Center');
-              },
+              onTap: _openHelpCenter, // NOW CLICKABLE - Opens webpage
             ),
             
             _buildNavTile(
               title: 'Contact Us',
               icon: Icons.contact_support_outlined,
-              onTap: () {
-                _showSnackBar('Open Contact Us');
-              },
+              onTap: _contactUs, // NOW CLICKABLE - Shows contact options
             ),
             
             _buildVersionTile(
