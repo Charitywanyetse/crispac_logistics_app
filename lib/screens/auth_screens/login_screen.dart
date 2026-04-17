@@ -4,8 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'registeration_screen.dart';
 import 'forgot_password_screen.dart';
 import 'package:crispac_logistics/screens/home_screen.dart';
-// Remove this line - it's causing the conflict
-// import 'package:crispac_logistics/screens/dashboard_screen.dart';
+import 'package:crispac_logistics/services/api_services.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -21,6 +20,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _rememberMe = false;
 
+  final ApiService _apiService = ApiService();
+
   // Real app store URLs
   final String _googlePlayStoreUrl = 'https://play.google.com/store/apps/details?id=com.crispac.logistics';
   final String _appleAppStoreUrl = 'https://apps.apple.com/app/id1234567890';
@@ -30,38 +31,35 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
 
-    await Future.delayed(Duration(seconds: 2));
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', 'demo_token');
-    await prefs.setString('user_email', _emailController.text.trim());
-    await prefs.setString('user_name', 'Alexander');
-    await prefs.setBool('remember_me', _rememberMe);
-    
-    // Check if admin email
-    if (_emailController.text.trim() == 'crispac2@gmail.com' || 
-        _emailController.text.trim() == 'admin@crispac.com') {
-      await prefs.setBool('is_admin', true);
-      await prefs.setString('user_role', 'Administrator');
-      await prefs.setString('user_name', 'Charity');
-      
-      if (mounted) {
-        // Use pushReplacementNamed instead of direct constructor
-        Navigator.pushReplacementNamed(context, '/dashboard');
-      }
-    } else {
-      await prefs.setBool('is_admin', false);
-      await prefs.setString('user_role', 'Customer');
-      
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => HomeScreen()),
-        );
-      }
-    }
+    final result = await _apiService.login(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
 
     setState(() => _isLoading = false);
+
+    if (result['success']) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('remember_me', _rememberMe);
+      
+      final isAdmin = prefs.getBool('is_admin') ?? false;
+      final userRole = prefs.getString('user_role') ?? 'customer';
+      
+      if (isAdmin || userRole == 'admin') {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/admin-dashboard');
+        }
+      } else {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => HomeScreen()),
+          );
+        }
+      }
+    } else {
+      _showSnackBar(result['message'], isError: true);
+    }
   }
 
   Future<void> _saveAdminCredentials() async {
@@ -111,6 +109,17 @@ class _LoginScreenState extends State<LoginScreen> {
         ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutQuad));
         return SlideTransition(position: offsetAnimation, child: child);
       },
+    );
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red.shade400 : Colors.green.shade400,
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 3),
+      ),
     );
   }
 
@@ -406,14 +415,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           
                           SizedBox(height: 16),
 
-                          // Admin Dashboard Test Button
+                          // Admin Dashboard Test Button (for development only)
                           SizedBox(
                             width: double.infinity,
                             child: OutlinedButton(
                               onPressed: () async {
                                 await _saveAdminCredentials();
                                 if (mounted) {
-                                  // Use pushReplacementNamed instead of direct constructor
                                   Navigator.pushReplacementNamed(context, '/dashboard');
                                 }
                               },
@@ -561,16 +569,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        duration: Duration(seconds: 2),
       ),
     );
   }
