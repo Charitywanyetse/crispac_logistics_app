@@ -40,10 +40,6 @@ class ApiService {
         
         if (result['status'] == 'success') {
           final data = result['data'];
-          
-          // ADD THIS PRINT LINE HERE
-          print('User role from API: ${data['user']['role']}');
-          
           final prefs = await SharedPreferences.getInstance();
           
           await prefs.setString('token', data['token']);

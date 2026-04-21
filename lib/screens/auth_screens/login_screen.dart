@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'registeration_screen.dart';
+import 'package:http/http.dart' as http;
 import 'forgot_password_screen.dart';
 import 'package:crispac_logistics/screens/home_screen.dart';
+import 'package:crispac_logistics/screens/dashboard_screen.dart';
 import 'package:crispac_logistics/services/api_services.dart';
+
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -27,15 +30,26 @@ class _LoginScreenState extends State<LoginScreen> {
   final String _appleAppStoreUrl = 'https://apps.apple.com/app/id1234567890';
 
   Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
+    print('========== LOGIN ATTEMPT ==========');
+    print('Email: ${_emailController.text}');
+    
+    if (!_formKey.currentState!.validate()) {
+      print('Form validation failed');
+      return;
+    }
 
+    print('Form validation passed');
     setState(() => _isLoading = true);
 
+    print('Calling API login...');
     final result = await _apiService.login(
       _emailController.text.trim(),
       _passwordController.text.trim(),
     );
 
+    print('API Result success: ${result['success']}');
+    print('API Result data: ${result['data']}');
+    
     setState(() => _isLoading = false);
 
     if (result['success']) {
@@ -45,11 +59,22 @@ class _LoginScreenState extends State<LoginScreen> {
       final isAdmin = prefs.getBool('is_admin') ?? false;
       final userRole = prefs.getString('user_role') ?? 'customer';
       
+      print('=== USER DATA FROM STORAGE ===');
+      print('is_admin from prefs: $isAdmin');
+      print('user_role from prefs: $userRole');
+      print('user_email from prefs: ${prefs.getString('user_email')}');
+      print('================================');
+      
       if (isAdmin || userRole == 'admin') {
+        print('✅ NAVIGATING TO ADMIN DASHBOARD');
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/admin-dashboard');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => DashboardScreen()),
+          );
         }
       } else {
+        print('✅ NAVIGATING TO CUSTOMER HOME');
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -58,18 +83,23 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     } else {
+      print('❌ Login failed: ${result['message']}');
       _showSnackBar(result['message'], isError: true);
     }
   }
 
-  Future<void> _saveAdminCredentials() async {
+  // Debug method to check stored credentials
+  Future<void> _checkStoredCredentials() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_logged_in', true);
-    await prefs.setBool('is_admin', true);
-    await prefs.setString('user_email', 'crispac2@gmail.com');
-    await prefs.setString('user_name', 'Charity');
-    await prefs.setString('user_role', 'Administrator');
-    await prefs.setString('token', 'admin_demo_token');
+    print('===== STORED CREDENTIALS =====');
+    print('Token: ${prefs.getString('token')}');
+    print('is_admin: ${prefs.getBool('is_admin')}');
+    print('user_role: ${prefs.getString('user_role')}');
+    print('user_email: ${prefs.getString('user_email')}');
+    print('user_name: ${prefs.getString('user_name')}');
+    print('==============================');
+    
+    _showSnackBar('Check terminal for stored credentials');
   }
 
   Future<void> _launchGooglePlayStore() async {
@@ -383,6 +413,27 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           SizedBox(height: 24),
 
+                          // Debug Button - Check Stored Credentials
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: _checkStoredCredentials,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.orange,
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  side: BorderSide(color: Colors.orange),
+                                ),
+                              ),
+                              child: Text(
+                                "Debug: Check Storage",
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 12),
+
                           // Sign In Button
                           _isLoading
                               ? Center(
@@ -412,33 +463,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                 ),
-                          
-                          SizedBox(height: 16),
-
-                          // Admin Dashboard Test Button (for development only)
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton(
-                              onPressed: () async {
-                                await _saveAdminCredentials();
-                                if (mounted) {
-                                  Navigator.pushReplacementNamed(context, '/dashboard');
-                                }
-                              },
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Color(0xFF8E2DE2),
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  side: BorderSide(color: Color(0xFF8E2DE2)),
-                                ),
-                              ),
-                              child: Text(
-                                "Admin Dashboard (Test)",
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ),
                           
                           SizedBox(height: 24),
 

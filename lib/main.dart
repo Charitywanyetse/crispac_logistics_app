@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
         '/register': (context) => RegisterationScreen(),
         '/forgot-password': (context) => ForgotPasswordScreen(),
         '/customer': (context) => MainScreen(),
-        '/dashboard': (context) => DashboardScreen(), // Dashboard route
+        '/dashboard': (context) => AdminDashboardScreen(), // Dashboard route
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/verification') {

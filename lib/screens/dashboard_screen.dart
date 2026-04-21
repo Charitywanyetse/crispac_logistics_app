@@ -242,12 +242,12 @@ class SupportScreen extends StatelessWidget {
 }
 
 // Dashboard Screen
-class DashboardScreen extends StatefulWidget {
+class AdminDashboardScreen extends StatefulWidget {
   @override
-  _DashboardScreenState createState() => _DashboardScreenState();
+  _AdminDashboardScreenState createState() => _AdminDashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _selectedIndex = 0;
   bool _isSidebarExpanded = true;
   String _userName = 'Charity';
