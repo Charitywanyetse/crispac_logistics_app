@@ -1,9 +1,8 @@
-// screens/splash_screen.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_screens/login_screen.dart';
 import '../customer/main_screen.dart';
-import 'dashboard_screen.dart'; // Add this import
+import 'dashboard_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -21,6 +20,16 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(Duration(seconds: 2));
     
     final prefs = await SharedPreferences.getInstance();
+    
+    // TEMPORARY: Clear saved data to force login screen
+    // Remove these lines after testing
+    await prefs.remove('is_logged_in');
+    await prefs.remove('token');
+    await prefs.remove('user_email');
+    await prefs.remove('user_name');
+    await prefs.remove('user_role');
+    await prefs.remove('is_admin');
+    
     final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
     final userEmail = prefs.getString('user_email') ?? '';
     

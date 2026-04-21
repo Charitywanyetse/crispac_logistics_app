@@ -6,10 +6,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 // Import your existing screens
+import '../admin/screens/products_management_screen.dart';
+import '../admin/screens/orders_management_screen.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
+import '../admin/screens/stats_screen.dart';
 
-// Simple Products Screen
+
 class ProductsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -72,35 +75,35 @@ class OrdersScreen extends StatelessWidget {
 }
 
 // Stats Screen
-class StatsScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFF8F9FF),
-      appBar: AppBar(
-        title: Text('Statistics', style: TextStyle(color: Color(0xFF8E2DE2))),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.bar_chart, size: 80, color: Color(0xFF8E2DE2).withOpacity(0.3)),
-            SizedBox(height: 16),
-            Text(
-              'Statistics & Analytics',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1A1C23)),
-            ),
-            SizedBox(height: 8),
-            Text('Coming Soon', style: TextStyle(color: Colors.grey)),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// class StatsScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Color(0xFFF8F9FF),
+//       appBar: AppBar(
+//         title: Text('Statistics', style: TextStyle(color: Color(0xFF8E2DE2))),
+//         backgroundColor: Colors.transparent,
+//         elevation: 0,
+//         centerTitle: true,
+//       ),
+//       body: Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Icon(Icons.bar_chart, size: 80, color: Color(0xFF8E2DE2).withOpacity(0.3)),
+//             SizedBox(height: 16),
+//             Text(
+//               'Statistics & Analytics',
+//               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1A1C23)),
+//             ),
+//             SizedBox(height: 8),
+//             Text('Coming Soon', style: TextStyle(color: Colors.grey)),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 // Support Screen
 class SupportScreen extends StatelessWidget {
@@ -331,14 +334,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
   
   final List<Map<String, dynamic>> _menuItems = [
-    {'title': 'Dashboard', 'icon': Icons.dashboard, 'index': 0},
-    {'title': 'Products', 'icon': Icons.inventory_2, 'index': 1},
-    {'title': 'Orders', 'icon': Icons.shopping_cart, 'index': 2},
-    {'title': 'Statistics', 'icon': Icons.bar_chart, 'index': 3},
-    {'title': 'Profile', 'icon': Icons.person, 'index': 4},
-    {'title': 'Settings', 'icon': Icons.settings, 'index': 5},
-    {'title': 'Support', 'icon': Icons.support_agent, 'index': 6},
-  ];
+  {'title': 'Dashboard', 'icon': Icons.dashboard, 'index': 0},
+  {'title': 'Products', 'icon': Icons.inventory_2, 'index': 1},      // Admin products
+  {'title': 'Orders', 'icon': Icons.shopping_cart, 'index': 2},      // Admin orders
+  {'title': 'Statistics', 'icon': Icons.bar_chart, 'index': 3},      // Admin stats
+  {'title': 'Profile', 'icon': Icons.person, 'index': 4},
+  {'title': 'Settings', 'icon': Icons.settings, 'index': 5},
+  {'title': 'Support', 'icon': Icons.support_agent, 'index': 6},
+];
   
   @override
   Widget build(BuildContext context) {
@@ -442,18 +445,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
   
-  Widget _buildMainContent() {
-    switch (_selectedIndex) {
-      case 0: return _buildDashboardContent();
-      case 1: return ProductsScreen();
-      case 2: return OrdersScreen();
-      case 3: return StatsScreen();
-      case 4: return ProfileScreen();
-      case 5: return SettingsScreen();
-      case 6: return SupportScreen();
-      default: return _buildDashboardContent();
-    }
+ Widget _buildMainContent() {
+  switch (_selectedIndex) {
+    case 0: return _buildDashboardContent();
+    case 1: return ProductsManagementScreen();  // Admin products management
+    case 2: return OrdersManagementScreen();    // Admin orders management  
+    case 3: return StatsScreen();               // Admin stats (your professional one)
+    case 4: return ProfileScreen();
+    case 5: return SettingsScreen();
+    case 6: return SupportScreen();
+    default: return _buildDashboardContent();
   }
+}
   
   Widget _buildDashboardContent() {
     return RefreshIndicator(

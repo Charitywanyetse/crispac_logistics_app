@@ -1,20 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../screens/home_screen.dart';  // Import from screens folder
 
 class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('CRISPAC Logistics'),
-        backgroundColor: Color(0xFF915BEE),
-      ),
-      body: Center(
-        child: Text(
-          'Customer Main Screen',
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
-    );
+    return HomeScreen();  // Return your existing HomeScreen
   }
 }
